@@ -12,9 +12,9 @@ close all
 addpath('functions\');
 fsa = 48000;
 
-dac = audioDeviceWriter(fsa,"Device",'Lautsprecher (2- USB Audio CODEC )');
-microphoneID = audiodevinfo(1,'Mikrofon (USB Audio CODEC )');
-adc = audiorecorder(fsa,16,1,microphoneID);
+% dac = audioDeviceWriter(fsa,"Device",'Lautsprecher (2- USB Audio CODEC )');
+% microphoneID = audiodevinfo(1,'Mikrofon (USB Audio CODEC )');
+% adc = audiorecorder(fsa,16,1,microphoneID);
 
 
 % variables
@@ -29,8 +29,6 @@ msg = 'In the quantum field all possibilities are real, until reality chooses on
 bits = sourceCoding(msg);  
 disp('message after transfering into bits:');
 disp(bits); 
-disp('Start')
-pause(2)
 
 % add redundancy for the later verification (2D-Parity) 
 bitsForChannel = channelCoding(bits); 
@@ -53,21 +51,21 @@ alpha = 0.9;
 s_TX = modulation(signalReal, signalImaginary);
 
 % we send it into the channel with the help of the soundcard
-adc.record();
-disp('Start')
-pause(2)
-
-dac.play([zeros(10000,1); s_TX'; zeros(10000,1)]);
-pause(2)
-
-disp('Stop')
-adc.stop();
-s_RX = adc.getaudiodata()';
+% adc.record();
+% disp('Start')
+% pause(2)
+% 
+% dac.play([zeros(10000,1); s_TX'; zeros(10000,1)]);
+% pause(2)
+% 
+% disp('Stop')
+% adc.stop();
+% s_RX = adc.getaudiodata()';
 
 % we have to cut arounf (3.4 to 3.6) theshold over 0.5 
 
 % demodulation
-demodulatedSignal = demodulation(s_RX);
+demodulatedSignal = demodulation(s_TX);
 
 % matched filter
 decodedSymbols = matchedFilter(demodulatedSignal,alpha); 
