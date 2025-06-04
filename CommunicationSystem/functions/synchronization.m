@@ -1,0 +1,29 @@
+function synchronizedSignal = synchronization(signalMatched,fsa, alpha, k)
+   Nsam= 8; 
+   Tsym = 1/6; 
+   fBp = 1/Tsym;
+   Tsa = 1/fsa;
+   nBp = 16; 
+   n = (0:nBp-1); 
+    
+   magnitudeSignal = abs(signalMatched); 
+
+   % filter coefficients of bandpass filter
+   BandPassFilter = cos(2*pi*n*1/Nsam); 
+   BandPassFilter= BandPassFilter'; 
+   j = 0; 
+   
+   for i = 1:nBp:length(signalMatched)
+       j = i+15;
+       signalFiltered(i:j,1) = BandPassFilter.*magnitudeSignal(i:j,1); 
+       signalFiltered(i:j,2) = BandPassFilter.*magnitudeSignal(i:j,2); 
+   end
+   disp(signalFiltered);
+    
+   % apply the pll to both real and imaginary part
+   realSignalFiltered = pll(signalFiltered(:,1), Nsam, alpha, k);
+   imaginarySignalFiltered = pll(signalFiltered(:,2), Nsam, alpha, k);
+   
+   synchronizedSignal= 1; 
+   
+end

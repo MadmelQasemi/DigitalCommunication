@@ -12,9 +12,10 @@ close all
 addpath('functions\');
 fsa = 48000;
 
-% dac = audioDeviceWriter(fsa,"Device",'Lautsprecher (2- USB Audio CODEC )');
+% dac = audioDeviceWriter(fsa,"Device",'Lautsprecher (2- USB Audio CODEC
+% )'); %output
 % microphoneID = audiodevinfo(1,'Mikrofon (USB Audio CODEC )');
-% adc = audiorecorder(fsa,16,1,microphoneID);
+% adc = audiorecorder(fsa,16,1,microphoneID); %input
 
 
 % variables
@@ -41,7 +42,8 @@ method = "16QAM";
 symbols = symbolMapping(bitsForChannel, alphabet, method);
 
 % choose your alpha
-alpha = 0.9; 
+alpha = 0.99; 
+k = 10; 
 % alpha = 0.5;
 
 % pulseshape filter for sending 
@@ -69,6 +71,12 @@ demodulatedSignal = demodulation(s_TX);
 
 % matched filter
 decodedSymbols = matchedFilter(demodulatedSignal,alpha); 
+
+% scatterplot
+scatterplot(decodedSymbols);
+
+% Synchronization
+synchronizedSignal = synchronization(decodedSymbols,fsa, alpha, k);
 
 % get the channel coded stream back
 stream = symbolDemapping(decodedSymbols, alphabet, method); 
