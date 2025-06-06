@@ -82,5 +82,4 @@ elseif (method == "16QAM")
     end
     disp('bits mapped int symbols via 16QAM method [real/imaginary]');
     disp(bitsAsSymbols); 
-    scatterplot(bitsAsSymbols);
 end

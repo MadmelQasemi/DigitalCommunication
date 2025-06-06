@@ -5,20 +5,26 @@
 % Datum: 22.04.2025
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Going through code and added " *** To Do: " to places I think should be
+% removed or changed
+% add a figure at the end of matchedfilter instead of demodulation
 
 clc
 clear
 close all
 addpath('functions\');
-fsa = 48000;
 
 % dac = audioDeviceWriter(fsa,"Device",'Lautsprecher (2- USB Audio CODEC )');
 % microphoneID = audiodevinfo(1,'Mikrofon (USB Audio CODEC )');
 % adc = audiorecorder(fsa,16,1,microphoneID);
-
+% figure('Name', 'Figure 1 Text', 'NumberTitle', 'off');
+% lab report mode
 
 % variables
 global LookUpTable;
+fsa = 48000; % sample frequency
+Nsym = 6;         % number of the symbols for each convolution step
+Nsam = 8;         % number of the samples for one symbol
 % symbols for mapping
 alphabet = [-3,-1,1,3];
 
@@ -45,7 +51,7 @@ alpha = 0.9;
 % alpha = 0.5;
 
 % pulseshape filter for sending 
-[signal, signalReal, signalImaginary] = pulseformFilter(symbols,alpha, method); 
+[signal, signalReal, signalImaginary] = pulseformFilter(symbols,alpha, method,fsa,Nsym, Nsam); 
 
 % modulation
 s_TX = modulation(signalReal, signalImaginary);
@@ -68,7 +74,7 @@ s_TX = modulation(signalReal, signalImaginary);
 demodulatedSignal = demodulation(s_TX);
 
 % matched filter
-decodedSymbols = matchedFilter(demodulatedSignal,alpha); 
+decodedSymbols = matchedFilter(demodulatedSignal,alpha,fsa,Nsym, Nsam); 
 
 % get the channel coded stream back
 stream = symbolDemapping(decodedSymbols, alphabet, method); 
@@ -79,4 +85,7 @@ rawBits = channelDecoding(stream);
 % translate for non-binary speaking folks
 message = sourceDecoding(rawBits);
 
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% figures and diagrams
+% figure 1: Mapping - Plotten Sie die komplexen Symbole als Konstellationsdiagramm
+scatterplot(symbols);

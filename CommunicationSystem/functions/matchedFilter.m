@@ -8,13 +8,10 @@
 % Output: A matrix with all symbols
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function symbolvector = matchedFilter(signal,alpha)
+function symbolvector = matchedFilter(signal,alpha,fsa,Nsym, Nsam)
 
 % variables needed
-Nsym = 6; 
-Nsam = 8; 
 Tsym = 1 / Nsym;
-fsa = 48000;
 Tsa = 1/fsa;
 
 % sepreate the real and imaginary part

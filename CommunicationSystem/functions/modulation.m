@@ -13,6 +13,7 @@ function signalToSend = modulation(signalReal,signalImaginary)
 fsa = 48000;
 Tsa = 1/fsa;
 fCarrier = 10000;
+t = (0:length(signalReal)-1);
 
 % make a time axis
 for n = 1:length(signalReal)
@@ -34,7 +35,7 @@ signalToSend = signalRealModulated + signalImaginaryModulated;
 %signalToSendNoisy = signalToSend + p_N * randn(size(signalToSend)); 
 %signalToSend = signalToSendNoisy; 
 
-% plot the original symbols and s_TX  
+% plot the original symbols and the signal that suppose to transfer them  
 figure;                                             % real part
 subplot(3,1,1);
 plot(time, signalRealModulated);

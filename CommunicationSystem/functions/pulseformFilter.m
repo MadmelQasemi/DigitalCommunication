@@ -8,15 +8,12 @@
 % Output: signal after convolution with root raised cosine
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function [signal,signalReal, signalImaginary] = pulseformFilter(symbols, alpha, method)
+function [signal,signalReal, signalImaginary] = pulseformFilter(symbols, alpha, method,fsa, Nsym, Nsam)
 
 % variables needed
-Nsym = 6;          % number of the symbols for each convolution step
-Nsam = 8;          % number of the samples for one symbol
-Tsym = 1 / Nsym;   % time for sending one symbol
-fsa = 48000;       % sample frequency
-Tsa = 1/fsa;       % sample time
-index = 1;         % variable for loop control
+Tsym = 1 / Nsym;  % time per symbol
+Tsa = 1/fsa;      % sample time
+index = 1;        % variable for loop control
 
 
 %  adapt the vector of symbols (isolate real and imaginary parts)
@@ -37,9 +34,9 @@ else  % if method == "QAM16"
     end
 end
 
-% save the old values to plot later
-real = realSymbolsVector;
-imaginary = imaginarySymbolVector;
+% save the old values to plot later - *** To Do: would remove. have original signal 
+% real = realSymbolsVector;
+% imaginary = imaginarySymbolVector;
 
 % amplify the signal to hear it better later
 realSymbolsVector = Nsam*upsample(realSymbolsVector,Nsam);
@@ -58,52 +55,97 @@ h = rcosdesign(alpha,Nsym,Nsam,'sqrt');
 scale = sum(h);
 rootRaisedCos = h/scale;
 
-% pulseshape filter is applied sepreatly (first convolution with root raised cos before modulation)
-yReal = conv(realSymbolsVector,rootRaisedCos,'same');
-yImaginary = conv(imaginarySymbolVector,rootRaisedCos,'same');
+% pulseshape filter is applied separately (first convolution with root raised cos before modulation)
+signalReal = conv(realSymbolsVector,rootRaisedCos,'same');
+signalImaginary = conv(imaginarySymbolVector,rootRaisedCos,'same');
 
-% define the outputs immediatly
-signalReal = yReal;
-signalImaginary = yImaginary; 
+% define the outputs immediately *** To Do: I would remove this. We can
+% just redefine the noisey signals
+% signalReal = signalReal;
+% signalImaginary = signalImaginary; 
 
 % time axis for the plot
-vectorLen= length(yReal);
+vectorLen= length(signalReal);
 xAchis = ((0:vectorLen-1)*Tsa);
-t = (0:length(real)-1) * Tsym* (10^-3); % time axis for the original symbols
+t = (0:length(symbols)-1) * Tsym* (10^-3); % time axis for the original symbols
 
+% plot the original symbols and the Carrier signal 
+% Plot the filter's impulse response and transfer function for different values of alpha in one figure and two subplots for comparison. (Figure 2
+alphas = [0, 0.4, 0.7, 0.9];
+
+figure                                             % real part
+subplot(2,1,1);
+hold on;
+for a = 1:length(alphas)
+    alpha_t = alphas(a);
+    h = rcosdesign(alpha_t,Nsym,Nsam,'sqrt');
+    scale = sum(h);
+    normalized_hrc = h/scale;
+    t = (0:length(h)-1); % time axis for the original symbols
+    plot(t,normalized_hrc,'DisplayName', sprintf('\\alpha = %.2f', alpha_t));
+end
+title('Impulse Response of the Filter with different Alphas');
+xlabel('Time [Tsym]');
+ylabel('h(t)');
+legend;
+grid on;
+
+subplot(2,1,2);
+f = linspace(-0.5, 0.5, 1024);   % Normalized frequency
+hold on;
+for a = 1:length(alphas)
+    alpha_t = alphas(a);
+    h = rcosdesign(alpha_t,Nsym,Nsam,'sqrt');
+    scale = sum(h);
+    normalized_hrc = h/scale;
+    transfer_function = fftshift(abs(fft(normalized_hrc, 1024))); % fft n = 1024 may need to be increased if not fine enough
+    plot(f,transfer_function,'DisplayName', sprintf('\\alpha = %.2f', alpha_t));
+end
+title('Transfer Function with different Alphas');
+xlabel('Frequency [1/Tsym]');
+ylabel('|H(f)|');
+legend;
+grid on;
+
+% Plot the filter output and the input symbols. (Figure 3)
 % plot the original soymbols and the signal that suppose to transfer them
+symbolTime = (0:size(symbols,1)-1) * Tsym *(10^-3);
 figure;                                             % real part
 subplot(2,1,1);
-plot(xAchis, yReal);
+plot(xAchis, signalReal);
 hold on;
-plot(t,real,'x');
-title('Real Impulse Response after pulsefilter');
+stem(symbolTime,symbols(:,1));
+title('Real Impulse Response after Pulse Filter');
+xlabel('Time [Tsym]');
+ylabel('Real {y(n)}');
 
 subplot(2,1,2);                                     % imaginary part
-plot(xAchis,yImaginary);
+plot(xAchis,signalImaginary);
 hold on;
-plot(t,imaginary,'x');
-title('Imaginary Impulse Response after pulsefilter');
+stem(symbolTime,symbols(:,2));
+title('Imaginary Impulse Response after  Pulse Filter');
+xlabel('Time [Tsym]');
+ylabel('Imaginary {y(n)}');
 
 % adding white Gaussian noise to the signal
-%yReal = awgn(yReal,10);                    % parameters:(signal,snr)
-%yImaginary = awgn(yImaginary,10);
+%signalReal = awgn(signalReal,10);                    % parameters:(signal,snr)
+%signalImaginary = awgn(signalImaginary,10);
 
 % plot signal with noise
 % figure;
 % subplot(2,1,1);
-% plot(xAchis, yReal);
+% plot(xAchis, signalReal);
 % title('signal representing the real values + noise');
 
 subplot(2,1,2);
-plot(xAchis, yImaginary);
+plot(xAchis, signalImaginary);
 title('signal representing the imaginary values + noise');
 
 
 % puting the new representation of the signal into one matrix for later
 for i = 1:vectorLen
-    signal(i,1)= yReal(i);
-    signal(i,2)= yImaginary(i);
+    signal(i,1)= signalReal(i);
+    signal(i,2)= signalImaginary(i);
 end
 
 end
