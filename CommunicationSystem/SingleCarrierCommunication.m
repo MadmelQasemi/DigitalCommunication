@@ -14,11 +14,11 @@ clear
 close all
 addpath('functions\');
 
-% dac = audioDeviceWriter(fsa,"Device",'Lautsprecher (2- USB Audio CODEC )');
+% dac = audioDeviceWriter(fsa,"Device",'Lautsprecher (2- USB Audio CODEC
+% )'); %output
 % microphoneID = audiodevinfo(1,'Mikrofon (USB Audio CODEC )');
-% adc = audiorecorder(fsa,16,1,microphoneID);
-% figure('Name', 'Figure 1 Text', 'NumberTitle', 'off');
-% lab report mode
+% adc = audiorecorder(fsa,16,1,microphoneID); %input
+
 
 % variables
 global LookUpTable;
@@ -47,34 +47,46 @@ method = "16QAM";
 symbols = symbolMapping(bitsForChannel, alphabet, method);
 
 % choose your alpha
-alpha = 0.9; 
+alpha = 0.99; 
+k = 10; 
 % alpha = 0.5;
 
 % pulseshape filter for sending 
 [signal, signalReal, signalImaginary] = pulseformFilter(symbols,alpha, method,fsa,Nsym, Nsam); 
 
 % modulation
-s_TX = modulation(signalReal, signalImaginary);
+sTX = modulation(signalReal, signalImaginary);
 
 % we send it into the channel with the help of the soundcard
 % adc.record();
 % disp('Start')
 % pause(2)
 % 
-% dac.play([zeros(10000,1); s_TX'; zeros(10000,1)]);
+% dac.play([zeros(10000,1); sTX'; zeros(10000,1)]);
 % pause(2)
 % 
 % disp('Stop')
 % adc.stop();
-% s_RX = adc.getaudiodata()';
+% sRX = adc.getaudiodata()';
 
-% we have to cut arounf (3.4 to 3.6) theshold over 0.5 
+% simulate sRX to test if the extraction is correct
+sRX = [zeros(10000,1); sTX'; zeros(10000,1)];
+
+extractedMsg = cutOffMsg(sRX,sTX); % cheating by using sTX
+
+% we have to cut around (3.4 to 3.6) theshold over 0.5 
 
 % demodulation
-demodulatedSignal = demodulation(s_TX);
+demodulatedSignal = demodulation(extractedMsg);
 
 % matched filter
 decodedSymbols = matchedFilter(demodulatedSignal,alpha,fsa,Nsym, Nsam); 
+
+% scatterplot
+scatterplot(decodedSymbols);
+
+% Synchronization
+% synchronizedSignal = synchronization(decodedSymbols,fsa, alpha, k);
 
 % get the channel coded stream back
 stream = symbolDemapping(decodedSymbols, alphabet, method); 
