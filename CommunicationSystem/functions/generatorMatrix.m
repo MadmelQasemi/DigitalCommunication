@@ -7,6 +7,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function genMatrix = generatorMatrix(dimension)
+global debug_generatorMatrix
 % make a matrix in the right dimension
 genMatrix = zeros(dimension,dimension);
 
@@ -23,8 +24,9 @@ for i = 1 : dimension
 end
 
 % show the result
-disp('generator matrix'); 
-disp(genMatrix);
-
+if debug_generatorMatrix
+    disp('generator matrix'); 
+    disp(genMatrix);
+end
 end 
  

@@ -185,7 +185,7 @@ grid on;
 % Plot of filter output after first filter
 symbolTime = (0:size(symbols,1)-1) * Tsym *(10^-3);
 figure;                                             % real part
-subplot(3,2,1);
+subplot(2,2,1);
 plot(xAchis, signalReal);
 hold on;
 stem(symbolTime,symbols(:,1));
@@ -193,7 +193,7 @@ title('Real Impulse Response after Pulse Filter');
 xlabel('Time [Tsym]');
 ylabel('Real {y(n)}');
 
-subplot(3,2,2);                                     % imaginary part
+subplot(2,2,2);                                     % imaginary part
 plot(xAchis,signalImaginary);
 hold on;
 stem(symbolTime,symbols(:,2));
@@ -213,7 +213,7 @@ title('Real Impulse Response after Matched Filter');
 xlabel('Time [Tsym]');
 ylabel('y(n)');
                                                       % imaginary part
-subplot(3,2,4);  
+subplot(2,2,4);  
 plot(x_axis,yImaginary);
 hold on;
 stem(symbolTime_1,decodedSymbols(:,2));
@@ -226,7 +226,7 @@ eyeX = (0:samplePerSymbol-1)*Tsa*(1e6);
 max = length(yReal)-samplePerSymbol;
 
 % real plot
-subplot(3,2,5);  
+subplot(2,2,5);  
 hold on;
 title('eyediagram for two symbols');
 xlabel('time (normed to symbol)');
@@ -238,7 +238,7 @@ for n = 1:Nsam:max
 end
 
 % imaginary plot
-subplot(3,2,6);  
+subplot(2,2,6);  
 hold on;
 title('eyediagram for two symbols');
 xlabel('time (normed to symbol)');

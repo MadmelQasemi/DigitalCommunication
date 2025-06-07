@@ -1,8 +1,8 @@
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Name: Brianna, Madmel 
 % Date: 06.06.2025
-% This function cut off the message from the long audiosignal 
-% Input: the whole message which was recieved recieved through channel
+% This function cust off the message from the long audiosignal 
+% Input: the whole message which was recieved from the channel
 % Output: the extracted message 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
