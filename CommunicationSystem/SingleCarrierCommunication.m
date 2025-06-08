@@ -21,10 +21,12 @@ global debug_modulation
 global debug_demodulation
 global debug_sourceCoding
 global debug_generatorMatrix
+global debug_synchronization
 
 debug_sourceCoding = false;
 debug_channelCoding = false;
 debug_generatorMatrix = false;
+debug_synchronization = true;
 sound_card = false
 % debug_channelDecoding = false;
 
@@ -107,7 +109,7 @@ demodulatedSignal = demodulation(extractedMsg);
 scatterplot(decodedSymbols);
 
 % Synchronization
-% synchronizedSignal = synchronization(decodedSymbols,fsa, alpha, k);
+synchronizedSignal = synchronization(decodedSymbols,fsa, alpha, k);
 
 % get the channel coded stream back
 stream = symbolDemapping(decodedSymbols, alphabet, method); 
@@ -225,10 +227,10 @@ samplePerSymbol = 2*Nsam;
 eyeX = (0:samplePerSymbol-1)*Tsa*(1e6);
 max = length(yReal)-samplePerSymbol;
 
-% real plot
+% Eye diagram for real part
 subplot(3,2,5);  
 hold on;
-title('eyediagram for two symbols');
+title('Eye Diagram for Two Symbols');
 xlabel('time (normed to symbol)');
 ylabel('Amplitude real');
 
@@ -237,11 +239,11 @@ for n = 1:Nsam:max
     plot(eyeX,symbolSamples);
 end
 
-% imaginary plot
+% Eye diagram for imaginary part
 subplot(3,2,6);  
 hold on;
-title('eyediagram for two symbols');
-xlabel('time (normed to symbol)');
+title('Eye Diagram for Two Symbols');
+xlabel('Time (normed to symbol)');
 ylabel('Amplitude imaginär');
 
 for n = 1:Nsam:max
