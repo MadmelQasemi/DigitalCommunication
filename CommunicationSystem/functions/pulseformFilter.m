@@ -34,10 +34,6 @@ else  % if method == "QAM16"
     end
 end
 
-% save the old values to plot later - *** To Do: would remove. have original signal 
-% real = realSymbolsVector;
-% imaginary = imaginarySymbolVector;
-
 % amplify the signal to hear it better later
 realSymbolsVector = Nsam*upsample(realSymbolsVector,Nsam);
 imaginarySymbolVector =Nsam* upsample(imaginarySymbolVector,Nsam);
@@ -58,27 +54,6 @@ rootRaisedCos = h/scale;
 % pulseshape filter is applied separately (first convolution with root raised cos before modulation)
 signalReal = conv(realSymbolsVector,rootRaisedCos,'same');
 signalImaginary = conv(imaginarySymbolVector,rootRaisedCos,'same');
-
-% define the outputs immediately *** To Do: I would remove this. We can
-% just redefine the noisey signals
-% signalReal = signalReal;
-% signalImaginary = signalImaginary; 
-
-
-
-% adding white Gaussian noise to the signal
-%signalReal = awgn(signalReal,10);                    % parameters:(signal,snr)
-%signalImaginary = awgn(signalImaginary,10);
-
-% plot signal with noise
-% figure;
-% subplot(2,1,1);
-% plot(xAchis, signalReal);
-% title('signal representing the real values + noise');
-
-% subplot(2,1,2);
-% plot(xAchis, signalImaginary);
-% title('signal representing the imaginary values + noise');
 
 
 % puting the new representation of the signal into one matrix for later

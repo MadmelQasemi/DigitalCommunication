@@ -32,55 +32,6 @@ rootRaisedCos = h/scale;
 yReal = conv(yReal, rootRaisedCos,'same');
 yImaginary = conv(yImaginary, rootRaisedCos,'same');
 
-% plot the eyediagram manuely
-% calssical eyediagram needs two symbols instead of 1
-
-vectorLen = length(yReal);
-xAchis = ((0:vectorLen-1)*Tsa);
-
-% samplePerSymbol = 2*Nsam;
-% eyeX = (0:samplePerSymbol-1)*Tsa*(1e6);
-% %eye_x = linspace(-1, 1, 2*Nsam); % normed
-% max = vectorLen-samplePerSymbol;
-% 
-% % real plot
-% figure;
-% hold on;
-% title('eyediagram for two symbols');
-% xlabel('time (normed to symbol)');
-% ylabel('Amplitude real');
-% 
-% for n = 1:Nsam:max
-%     symbolSamples = yReal(n:n+samplePerSymbol-1);
-%     plot(eyeX,symbolSamples);
-% end
-% 
-% % imaginary plot
-% figure;
-% hold on;
-% title('eyediagram for two symbols');
-% xlabel('time (normed to symbol)');
-% ylabel('Amplitude imaginär');
-% 
-% for n = 1:Nsam:max
-%     symbolSamples = yImaginary(n:n+samplePerSymbol-1);
-%     plot(eyeX,symbolSamples);
-% end
-
-% to compare
-%eyediagram(yReal,Nsam);
-%eyediagram(yImaginary,Nsam);
-
-% plots after matched filter
-% figure;
-% subplot(2,1,1);
-% plot(xAchis, yReal);
-% title('Real Impulse Response after matched filter');
-% 
-% subplot(2,1,2);
-% plot(xAchis,yImaginary);
-% title('Imaginary Impulse Response after matched filter');
-
 % decode
 start = 1;
 len = length(yReal);

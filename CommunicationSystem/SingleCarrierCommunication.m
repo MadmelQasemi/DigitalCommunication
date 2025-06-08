@@ -27,7 +27,7 @@ debug_sourceCoding = false;
 debug_channelCoding = false;
 debug_generatorMatrix = false;
 debug_synchronization = true;
-sound_card = false
+sound_card = false;
 % debug_channelDecoding = false;
 
 if sound_card
@@ -45,6 +45,8 @@ Tsym = 1 / Nsym;
 Tsa = 1 / fsa;
 % symbols for mapping
 alphabet = [-3,-1,1,3];
+barkerCode = 3 * [1 1 1 1 1 -1 -1 1 1 -1 1 -1 1];
+barkerCode = barkerCode'; 
 
 % message to send and recieve
 msg = 'In the quantum field all possibilities are real, until reality chooses one';
@@ -65,7 +67,7 @@ bitsForChannel = channelCoding(bits);
 method = "16QAM"; 
 
 % mapping the bits into symbols
-symbols = symbolMapping(bitsForChannel, alphabet, method);
+symbols = symbolMapping(bitsForChannel, alphabet, method, barkerCode);
 
 % choose your alpha
 alpha = 0.99; 
@@ -105,11 +107,8 @@ demodulatedSignal = demodulation(extractedMsg);
 % matched filter
 [decodedSymbols,yReal,yImaginary] = matchedFilter(demodulatedSignal,alpha,fsa,Nsym,Nsam); 
 
-% scatterplot
-scatterplot(decodedSymbols);
-
 % Synchronization
-synchronizedSignal = synchronization(decodedSymbols,fsa, alpha, k);
+synchronizedSignal = synchronization(decodedSymbols,fsa, alpha, k, barkerCode, yReal);
 
 % get the channel coded stream back
 stream = symbolDemapping(decodedSymbols, alphabet, method); 
@@ -203,7 +202,6 @@ title('Imaginary Impulse Response after Pulse Filter');
 xlabel('Time [Tsym]');
 ylabel('Imaginary {y(n)}');
 
-
 % Plot of filter output after second filter
 x_axis = ((0:length(yReal)-1)*Tsa);                                             % real part
 symbolTime_1 = (0:size(symbols,1)-1) * Tsym *(10^-3);
@@ -251,3 +249,25 @@ for n = 1:Nsam:max
     plot(eyeX,symbolSamples);
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% scatterplot
+scatterplot(decodedSymbols);
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% filtered 
+noisySignalReal = signalReal;
+noisySignalImaginary = signalImaginary; 
+
+% adding white Gaussian noise to the signal
+noisySignalReal = awgn(noisySignalReal,10);                    % parameters:(signal,snr)
+noisySignalImaginary = awgn(noisySignalImaginary,10);
+
+% plot signal with noise
+figure;
+subplot(2,1,1);
+plot(xAchis, noisySignalReal);
+title('signal representing the real values + noise');
+
+subplot(2,1,2);
+plot(xAchis, noisySignalImaginary);
+title('signal representing the imaginary values + noise');

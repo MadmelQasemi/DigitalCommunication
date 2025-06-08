@@ -10,7 +10,7 @@
 % und schließlich führt eine PLL den Symboltakt nach, um auch Strecken mit mehreren gleichen Symbolen überbrücken zu können.
 % Mit der MATLAB-Funktion sign() kann das Ausgangssignal der PLL noch in ein Rechtecksignal umgewandelt werden, um den Abtastzeitpunkt exakt zu bestimmen:
 
-function synchronizedSignal = synchronization(signalMatched,fsa, alpha, k)
+function synchronizedSignal = synchronization(signalMatched,fsa, alpha, k,barkerCode, yReal)
 global debug_synchronization
 Nsam= 8;
 Tsa = 1/fsa;
@@ -19,29 +19,38 @@ fBp = 1/Tsym;
 nBp = 16;
 n = (0:nBp-1);
 
-magnitudeSignal = abs(signalMatched);
+magnitudeSignal = abs(fft(yReal));
 
 % filter coefficients of bandpass filter
 BandPassFilter = cos(2*pi*fBp*n*Tsa);
 BandPassFilter= BandPassFilter';
-% j = 0;
-%
-% for i = 1:nBp:length(signalMatched)
-%     j = i+15;
-%     signalFiltered(i:j,1) = BandPassFilter.*magnitudeSignal(i:j,1);
-%     signalFiltered(i:j,2) = BandPassFilter.*magnitudeSignal(i:j,2);
-% end
-signalFiltered(:,1) = conv(magnitudeSignal(:,1), BandPassFilter, 'same');
-signalFiltered(:,2) = conv(magnitudeSignal(:,2), BandPassFilter, 'same');
+
+fSym = conv(magnitudeSignal(:,1), BandPassFilter, 'same');
+% signalFiltered(:,2) = conv(magnitudeSignal(:,2), BandPassFilter, 'same');
+
 
 if debug_synchronization
     disp(signalFiltered);
 end
 
 % apply the pll to both real and imaginary part
-realSignalFiltered = pll(signalFiltered(:,1), Nsam, alpha, k);
-imaginarySignalFiltered = pll(signalFiltered(:,2), Nsam, alpha, k);
+realSignalFiltered = pll(yReal, Nsam, alpha, k);
+%imaginarySignalFiltered = pll(signalFiltered(:,2), Nsam, alpha, k);
 
-synchronizedSignal= realSignalFiltered + 1i * imaginarySignalFiltered;
+% Amplitude Correction 
+factorReal = barkerCode(1:end)./realSignalFiltered(1:13);
+factorImaginary = barkerCode(1:end)./imaginarySignalFiltered(1:13);
 
+factorRealSum = sum(factorReal)/13;
+factorImaginarySum = sum(factorImaginary)/13;
+
+% get rid of the barker code and apply factor to the recieved Signal
+
+synchronizedSignalReal =factorRealSum .* realSignalFiltered;
+synchronizedSignalImaginary =factorImaginarySum .* imaginarySignalFiltered;
+
+resultReal =synchronizedSignalReal(14:end);
+resultImaginary =synchronizedSignalImaginary(14:end);
+
+synchronizedSignal = [resultReal,resultImaginary]; 
 end
