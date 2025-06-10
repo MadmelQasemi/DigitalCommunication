@@ -10,7 +10,8 @@
 % und schließlich führt eine PLL den Symboltakt nach, um auch Strecken mit mehreren gleichen Symbolen überbrücken zu können.
 % Mit der MATLAB-Funktion sign() kann das Ausgangssignal der PLL noch in ein Rechtecksignal umgewandelt werden, um den Abtastzeitpunkt exakt zu bestimmen:
 
-function synchronizedSignal = synchronization(signalMatched,fsa, alpha, k,barkerCode, yReal)
+function sym = synchronization(yReal, yImaginary, fsa, alpha, k, barkerCode)
+
 global debug_synchronization
 Nsam= 8;
 Tsa = 1/fsa;
@@ -19,38 +20,138 @@ fBp = 1/Tsym;
 nBp = 16;
 n = (0:nBp-1);
 
-magnitudeSignal = abs(fft(yReal));
+%%%%%%%%%%%%%%% generate Symbolclock and apply to signal after matched filter %%%%%%%%%%%%%%%
+
+% signal after matched filter: 
+% calculate the |𝑠̂𝑝(𝑡)| (real and imaginary part seprated) 
+magnitudeSignalReal = abs(yReal);
+magnitudeSignalImaginary = abs(yImaginary);
 
 % filter coefficients of bandpass filter
 BandPassFilter = cos(2*pi*fBp*n*Tsa);
 BandPassFilter= BandPassFilter';
 
-fSym = conv(magnitudeSignal(:,1), BandPassFilter, 'same');
-% signalFiltered(:,2) = conv(magnitudeSignal(:,2), BandPassFilter, 'same');
-
+% apply bandpass to the real and imaginary part of |𝑠̂𝑝(𝑡)|
+bandPassedReal = conv(magnitudeSignalReal, BandPassFilter, 'same');
+bandPassedImaginary = conv(magnitudeSignalImaginary,BandPassFilter, 'same'); 
 
 if debug_synchronization
-    disp(signalFiltered);
+    disp(bandPassedReal);
 end
 
 % apply the pll to both real and imaginary part
-realSignalFiltered = pll(yReal, Nsam, alpha, k);
-%imaginarySignalFiltered = pll(signalFiltered(:,2), Nsam, alpha, k);
+synchedSignalToSampleReal = pll(bandPassedReal, Nsam, alpha, k);
+synchedSignalToSampleImaginaary = pll(bandPassedImaginary, Nsam, alpha, k);
+
+clockReal = sign(synchedSignalToSampleReal);             % clock for real part after matched filter 
+clockImaginary = sign(synchedSignalToSampleImaginaary);  % clock for imaginary part after matched filter 
+
+
+% sample the signal after matched filter with the generated clock to synchronize 
+[symbolsRealSampled, symbolsImaginarySampled]= sampleWithClock(clockReal, clockImaginary, yReal, yImaginary ); 
+
+%%%%%%%%%%%%%%% Correction of the phase and Aamplitude after sampling %%%%%%%%%%%%%%%
 
 % Amplitude Correction 
-factorReal = barkerCode(1:end)./realSignalFiltered(1:13);
-factorImaginary = barkerCode(1:end)./imaginarySignalFiltered(1:13);
+% factorReal = barkerCode(1:end)./realSignalFiltered(1:13);
+% factorImaginary = barkerCode(1:end)./imaginarySignalFiltered(1:13);
+% 
+% factorRealSum = sum(factorReal)/13;
+% factorImaginarySum = sum(factorImaginary)/13;
+% 
+% % get rid of the barker code and apply factor to the recieved Signal
+% 
+% synchronizedSignalReal =factorRealSum .* realSignalFiltered;
+% synchronizedSignalImaginary =factorImaginarySum .* imaginarySignalFiltered;
+% 
+% resultReal =synchronizedSignalReal(14:end);
+% resultImaginary =synchronizedSignalImaginary(14:end);
+% 
+% synchronizedSignal = [resultReal,resultImaginary]; 
 
-factorRealSum = sum(factorReal)/13;
-factorImaginarySum = sum(factorImaginary)/13;
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% get rid of the barker code and apply factor to the recieved Signal
+% % decode part from matched filter (just in case we need it again)
+% start = 1;
+% len = length(yReal);
+% 
+% % value detection
+% index = 1;
+% sym(index,1) = yReal(start);
+% sym(index,2) = yImaginary(start);
+% index = index+1;
+% start = 8;
+% 
+% for n = start:8:len
+%     if n > (len-8)
+%         break;
+%     else
+%         sym(index,1)= yReal(n);
+%         sym(index,2)= yImaginary(n);
+%         index = index+1;
+%     end
+% end
+% 
+% disp('values of the samples on the right positions after matched filter');
+% disp(sym);
+% 
+% % round the values
+% for i = 1:length(sym)
+%     if(sym(i,1)<1.5 && sym(i,1)>0)
+%         sym(i,1)=1;
+%     elseif(sym(i,1)<4 && sym(i,1)>1.5)
+%         sym(i,1)=3;
+%     elseif(sym(i,1)>-4 && sym(i,1)<-1.5)
+%         sym(i,1)=-3;
+%     elseif(sym(i,1)>-1.5 && sym(i,1)<0)
+%         sym(i,1)=-1;
+%     end
+% end
+% 
+% for i = 1:length(sym)
+%     if(sym(i,2)<1.5 && sym(i,2)>0)
+%         sym(i,2)=1;
+%     elseif(sym(i,2)<4 && sym(i,2)>1.5)
+%         sym(i,2)=3;
+%     elseif(sym(i,2)>-4 && sym(i,2)<-1.5)
+%         sym(i,2)=-3;
+%     elseif(sym(i,2)>-1.5 && sym(i,2)<0)
+%         sym(i,2)=-1;
+%     end
+% end
+% 
+% disp('round the values to get the symbols')
+% disp(sym);
+% symbolvector = sym;
 
-synchronizedSignalReal =factorRealSum .* realSignalFiltered;
-synchronizedSignalImaginary =factorImaginarySum .* imaginarySignalFiltered;
+ sym = zeros(); 
+ % decode the real part
+ for i = 1:length(symbolsRealSampled)
+    if(symbolsRealSampled(i)<1.5 && symbolsRealSampled(i)>0)
+        sym(i,1)=1;
+    elseif(symbolsRealSampled(i)<4 && symbolsRealSampled(i)>1.5)
+        sym(i,1)=3;
+    elseif(symbolsRealSampled(i)>-4 && symbolsRealSampled(i)<-1.5)
+        sym(i,1)=-3;
+    elseif(symbolsRealSampled(i)>-1.5 && symbolsRealSampled(i)<0)
+        sym(i,1)=-1;
+    end
+ end
 
-resultReal =synchronizedSignalReal(14:end);
-resultImaginary =synchronizedSignalImaginary(14:end);
+ % decode imaginary part
+ for i = 1:length(symbolsImaginarySampled)
+    if(symbolsImaginarySampled(i)<1.5 && symbolsImaginarySampled(i)>0)
+        sym(i,2)=1;
+    elseif(symbolsImaginarySampled(i)<4 && symbolsImaginarySampled(i)>1.5)
+        sym(i,2)=3;
+    elseif(symbolsImaginarySampled(i)>-4 && symbolsImaginarySampled(i)<-1.5)
+        sym(i,2)=-3;
+    elseif(symbolsImaginarySampled(i)>-1.5 && symbolsImaginarySampled(i)<0)
+        sym(i,2)=-1;
+    end
+ end
 
-synchronizedSignal = [resultReal,resultImaginary]; 
+ disp('Ergebnis aus gesamplete Symbole');
+ disp(sym);
+
 end

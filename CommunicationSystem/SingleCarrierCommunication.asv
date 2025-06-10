@@ -21,12 +21,13 @@ global debug_modulation
 global debug_demodulation
 global debug_sourceCoding
 global debug_generatorMatrix
-
+global debug_synchronization
 
 debug_sourceCoding = false;
 debug_channelCoding = false;
 debug_generatorMatrix = false;
-sound_card = false
+debug_synchronization = true;
+sound_card = false;
 % debug_channelDecoding = false;
 
 if sound_card
@@ -37,13 +38,14 @@ end
 
 % variables
 global LookUpTable;
-fsa = 48000; % sample frequency
-Nsym = 6;         % number of the symbols for each convolution step
-Nsam = 8;         % number of the samples for one symbol
-Tsym = 1 / Nsym;
-Tsa = 1 / fsa;
-% symbols for mapping
-alphabet = [-3,-1,1,3];
+fsa = 48000;              % sample frequency
+Nsym = 6;                 % number of the symbols for each convolution step
+Nsam = 8;                 % number of the samples for one symbol
+Tsym = 1 / Nsym;          % time for one symbol  
+Tsa = 1 / fsa;            % periode of sampling  
+alphabet = [-3,-1,1,3];   % symbols for mapping
+barkerCode = 3 * [1 1 1 1 1 -1 -1 1 1 -1 1 -1 1]; % barkercode to define frames
+barkerCode = barkerCode'; 
 
 % message to send and recieve
 msg = 'In the quantum field all possibilities are real, until reality chooses one';
@@ -64,7 +66,7 @@ bitsForChannel = channelCoding(bits);
 method = "16QAM"; 
 
 % mapping the bits into symbols
-symbols = symbolMapping(bitsForChannel, alphabet, method);
+symbols = symbolMapping(bitsForChannel, alphabet, method, barkerCode);
 
 % choose your alpha
 alpha = 0.99; 
@@ -83,7 +85,7 @@ if sound_card
     disp('Start')
     pause(2)
     
-    dac.play([zeros(10000,1); sTX'; zeros(10000,1)]);
+    dac.play([zeros(10000,1); sTX'; zeros(10000,1)]); 
     pause(2)
     
     disp('Stop')
@@ -92,26 +94,23 @@ if sound_card
 end
 
 % simulate sRX to test if the extraction is correct
-sRX = [zeros(10000,1); sTX'; zeros(10000,1)];
+%sRX = [zeros(10000,1); sTX'; zeros(10000,1)];
 
-extractedMsg = cutOffMsg(sRX,sTX); % cheating by using sTX
+%extractedMsg = cutOffMsg(sRX,sTX); % cheating by using sTX
 
 % we have to cut around (3.4 to 3.6) theshold over 0.5 
 
 % demodulation
-demodulatedSignal = demodulation(extractedMsg);
+demodulatedSignal = demodulation(sTX);
 
 % matched filter
-[decodedSymbols,yReal,yImaginary] = matchedFilter(demodulatedSignal,alpha,fsa,Nsym,Nsam); 
+[yReal, yImaginary] = matchedFilter(demodulatedSignal, alpha, fsa, Nsym, Nsam); 
 
-% scatterplot
-scatterplot(decodedSymbols);
-
-% Synchronization
-% synchronizedSignal = synchronization(decodedSymbols,fsa, alpha, k);
+% Synchronization ( we have to decode here! ) 
+synchronizedSignal = synchronization(yReal, yImaginary, fsa, alpha, k, barkerCode);
 
 % get the channel coded stream back
-stream = symbolDemapping(decodedSymbols, alphabet, method); 
+stream = symbolDemapping(decodedAfterSynch, alphabet, method); 
 
 % verify the code and extract the original bits
 rawBits = channelDecoding(stream); 
@@ -202,7 +201,6 @@ title('Imaginary Impulse Response after Pulse Filter');
 xlabel('Time [Tsym]');
 ylabel('Imaginary {y(n)}');
 
-
 % Plot of filter output after second filter
 x_axis = ((0:length(yReal)-1)*Tsa);                                             % real part
 symbolTime_1 = (0:size(symbols,1)-1) * Tsym *(10^-3);
@@ -226,10 +224,10 @@ samplePerSymbol = 2*Nsam;
 eyeX = (0:samplePerSymbol-1)*Tsa*(1e6);
 max = length(yReal)-samplePerSymbol;
 
-% real plot
+% Eye diagram for real part
 subplot(3,2,5);  
 hold on;
-title('eyediagram for two symbols');
+title('Eye Diagram for Two Symbols');
 xlabel('time (normed to symbol)');
 ylabel('Amplitude real');
 
@@ -238,11 +236,11 @@ for n = 1:Nsam:max
     plot(eyeX,symbolSamples);
 end
 
-% imaginary plot
+% Eye diagram for imaginary part
 subplot(3,2,6);  
 hold on;
-title('eyediagram for two symbols');
-xlabel('time (normed to symbol)');
+title('Eye Diagram for Two Symbols');
+xlabel('Time (normed to symbol)');
 ylabel('Amplitude imaginär');
 
 for n = 1:Nsam:max
@@ -250,3 +248,25 @@ for n = 1:Nsam:max
     plot(eyeX,symbolSamples);
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% scatterplot
+scatterplot(decodedSymbols);
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% filtered 
+noisySignalReal = signalReal;
+noisySignalImaginary = signalImaginary; 
+
+% adding white Gaussian noise to the signal
+noisySignalReal = awgn(noisySignalReal,10);                    % parameters:(signal,snr)
+noisySignalImaginary = awgn(noisySignalImaginary,10);
+
+% plot signal with noise
+figure;
+subplot(2,1,1);
+plot(xAchis, noisySignalReal);
+title('signal representing the real values + noise');
+
+subplot(2,1,2);
+plot(xAchis, noisySignalImaginary);
+title('signal representing the imaginary values + noise');

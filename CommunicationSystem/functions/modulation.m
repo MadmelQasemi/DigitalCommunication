@@ -31,9 +31,9 @@ signalImaginaryModulated = carrierSignalImaginary .* signalImaginary;
 % adding them because we have only one channel to send
 signalToSend = signalRealModulated + signalImaginaryModulated;
 % add noise
-%p_N= 0.1; 
-%signalToSendNoisy = signalToSend + p_N * randn(size(signalToSend)); 
-%signalToSend = signalToSendNoisy; 
+% p_N= 0.1; 
+% signalToSendNoisy = signalToSend + p_N * randn(size(signalToSend)); 
+% signalToSend = signalToSendNoisy; 
 
 % plot the original symbols and the signal that suppose to transfer them  
 figure;                                             % real part

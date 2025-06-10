@@ -38,14 +38,13 @@ end
 
 % variables
 global LookUpTable;
-fsa = 48000; % sample frequency
-Nsym = 6;         % number of the symbols for each convolution step
-Nsam = 8;         % number of the samples for one symbol
-Tsym = 1 / Nsym;
-Tsa = 1 / fsa;
-% symbols for mapping
-alphabet = [-3,-1,1,3];
-barkerCode = 3 * [1 1 1 1 1 -1 -1 1 1 -1 1 -1 1];
+fsa = 48000;              % sample frequency
+Nsym = 6;                 % number of the symbols for each convolution step
+Nsam = 8;                 % number of the samples for one symbol
+Tsym = 1 / Nsym;          % time for one symbol  
+Tsa = 1 / fsa;            % periode of sampling  
+alphabet = [-3,-1,1,3];   % symbols for mapping
+barkerCode = 3 * [1 1 1 1 1 -1 -1 1 1 -1 1 -1 1]; % barkercode to define frames
 barkerCode = barkerCode'; 
 
 % message to send and recieve
@@ -86,7 +85,7 @@ if sound_card
     disp('Start')
     pause(2)
     
-    dac.play([zeros(10000,1); sTX'; zeros(10000,1)]);
+    dac.play([zeros(10000,1); sTX'; zeros(10000,1)]); 
     pause(2)
     
     disp('Stop')
@@ -95,23 +94,23 @@ if sound_card
 end
 
 % simulate sRX to test if the extraction is correct
-sRX = [zeros(10000,1); sTX'; zeros(10000,1)];
+%sRX = [zeros(10000,1); sTX'; zeros(10000,1)];
 
-extractedMsg = cutOffMsg(sRX,sTX); % cheating by using sTX
+%extractedMsg = cutOffMsg(sRX,sTX); % cheating by using sTX
 
 % we have to cut around (3.4 to 3.6) theshold over 0.5 
 
 % demodulation
-demodulatedSignal = demodulation(extractedMsg);
+demodulatedSignal = demodulation(sTX);
 
 % matched filter
-[decodedSymbols,yReal,yImaginary] = matchedFilter(demodulatedSignal,alpha,fsa,Nsym,Nsam); 
+[yReal, yImaginary] = matchedFilter(demodulatedSignal, alpha, fsa, Nsym, Nsam); 
 
-% Synchronization
-synchronizedSignal = synchronization(decodedSymbols,fsa, alpha, k, barkerCode, yReal);
+% Synchronization ( we have to decode here! ) 
+decodedAfterSynch = synchronization(yReal, yImaginary, fsa, alpha, k, barkerCode);
 
 % get the channel coded stream back
-stream = symbolDemapping(decodedSymbols, alphabet, method); 
+stream = symbolDemapping(decodedAfterSynch, alphabet, method); 
 
 % verify the code and extract the original bits
 rawBits = channelDecoding(stream); 
@@ -208,7 +207,7 @@ symbolTime_1 = (0:size(symbols,1)-1) * Tsym *(10^-3);
 subplot(3,2,3);  
 plot(x_axis,yReal);
 hold on;
-stem(symbolTime_1,decodedSymbols(:,1));
+stem(symbolTime_1,decodedAfterSynch(:,1));
 title('Real Impulse Response after Matched Filter');
 xlabel('Time [Tsym]');
 ylabel('y(n)');
@@ -216,7 +215,7 @@ ylabel('y(n)');
 subplot(3,2,4);  
 plot(x_axis,yImaginary);
 hold on;
-stem(symbolTime_1,decodedSymbols(:,2));
+stem(symbolTime_1,decodedAfterSynch(:,2));
 title('Imaginary Impulse Response after Matched Filter');
 xlabel('Time [Tsym]');
 ylabel('y(n)');
@@ -251,7 +250,7 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % scatterplot
-scatterplot(decodedSymbols);
+scatterplot(decodedAfterSynch);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % filtered 

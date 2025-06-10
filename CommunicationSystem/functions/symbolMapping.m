@@ -8,7 +8,8 @@
 % Output: a vector with alphabets that represent the bits from channel
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function resultWithBarker = symbolMapping(channelBits, alphabet, method, barkerCode)
+function bitsAsSymbols = symbolMapping(channelBits, alphabet, method, barkerCode)
+% to use the barkercode change bitsAsSymbols to resultWithBarker!
 
 % variables for calculation and control
 global LookUpTable;
@@ -88,6 +89,7 @@ elseif (method == "16QAM")
     realWithBarker(:,1)=[barkerCode(1:end,1);bitsAsSymbols(1:end,1)];
     imaginaryWithBarker(:,1)=[barkerCode(1:end,1);bitsAsSymbols(1:end,2)];
     resultWithBarker=[realWithBarker, imaginaryWithBarker];
+
 end
 disp(bitsAsSymbols);
 end
