@@ -8,7 +8,7 @@
 % Output: Matrix which contains both bitorder and the symbol
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function LUT = genLut(rowNum,colNum,alphabet,bitOrder)
-
+global debug_generatorMatrix
 % make a look up table
 LUT = zeros(rowNum,colNum+1);
 
@@ -19,6 +19,7 @@ LUT(:,1:colNum) = bitOrder;
 LUT(:,end)= alphabet(:);
 
 % show the table 
-disp(LUT); 
-
+if debug_generatorMatrix
+    disp(LUT); 
+end
 end

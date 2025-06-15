@@ -22,12 +22,14 @@ global debug_demodulation
 global debug_sourceCoding
 global debug_generatorMatrix
 global debug_synchronization
+global debug_symbolMapping
 
 debug_sourceCoding = false;
 debug_channelCoding = false;
 debug_generatorMatrix = false;
 debug_synchronization = true;
 sound_card = false;
+debug_symbolMapping = false;
 % debug_channelDecoding = false;
 
 if sound_card
@@ -123,7 +125,6 @@ message = sourceDecoding(rawBits);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % figure 1: Mapping - Plotten Sie die komplexen Symbole als Konstellationsdiagramm
-
 scatterplot(symbols);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -140,7 +141,7 @@ t = (0:length(symbols)-1) * Tsym* (10^-3); % time axis for the original symbols
 % plot the original symbols and the Carrier signal 
 alphas = [0, 0.4, 0.7, 0.9];
 
-figure                                             % real part
+fig2 = figure('Name', 'Figure 2: Pulseform Filter', 'NumberTitle', 'off');                                            % real part
 subplot(2,1,1);
 hold on;
 for a = 1:length(alphas)
@@ -184,7 +185,7 @@ grid on;
 
 % Plot of filter output after first filter
 symbolTime = (0:size(symbols,1)-1) * Tsym *(10^-3);
-figure;                                             % real part
+fig3 = figure('Name', 'Figure 3: Pulseform Filter', 'NumberTitle', 'off');                                             % real part
 subplot(3,2,1);
 plot(xAchis, signalReal);
 hold on;
@@ -253,6 +254,7 @@ end
 scatterplot(decodedAfterSynch);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Figure 4 Plotten alle bisherigen Diagramme auf der Empfängerseite nun mit den verrauschten Signalen. (Figure 3+4)
 % filtered 
 noisySignalReal = signalReal;
 noisySignalImaginary = signalImaginary; 
@@ -262,7 +264,7 @@ noisySignalReal = awgn(noisySignalReal,10);                    % parameters:(sig
 noisySignalImaginary = awgn(noisySignalImaginary,10);
 
 % plot signal with noise
-figure;
+fig4 = figure('Name', 'Figure 4: Matched Filter', 'NumberTitle', 'off');  
 subplot(2,1,1);
 plot(xAchis, noisySignalReal);
 title('signal representing the real values + noise');
@@ -270,3 +272,7 @@ title('signal representing the real values + noise');
 subplot(2,1,2);
 plot(xAchis, noisySignalImaginary);
 title('signal representing the imaginary values + noise');
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% First, calculate and plot the magnitude of the spectrum of the complex signal after the pulse
+% shape filter (Figure 5).
