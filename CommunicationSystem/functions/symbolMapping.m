@@ -13,6 +13,7 @@ function bitsAsSymbols = symbolMapping(channelBits, alphabet, method, barkerCode
 
 % variables for calculation and control
 global LookUpTable;
+global debug_symbolMapping
 len = length(alphabet);
 countBitPerSymbol = log2(len);
 
@@ -21,14 +22,17 @@ countBitPerSymbol = log2(len);
 genMatrix = generatorMatrix(countBitPerSymbol);
 bits = (0:len-1);
 bitOrder = dec2bin(bits, countBitPerSymbol)-'0';
-disp('possible bits');
-disp(bitOrder);
+
+if debug_symbolMapping
+    disp('possible bits');
+    disp(bitOrder);
+end
 
 % generate gray code of the sended bits
 gray = multToGray(len, bitOrder,genMatrix);
 
 % generate Look up table
-disp('symbols with the bit commbination they represent');
+disp('symbols with the bit combination they represent');
 LUT = genLut(len, countBitPerSymbol, alphabet, gray);
 LookUpTable = LUT;
 
