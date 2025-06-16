@@ -109,7 +109,7 @@ demodulatedSignal = demodulation(sTX);
 [yReal, yImaginary] = matchedFilter(demodulatedSignal, alpha, fsa, Nsym, Nsam); 
 
 % Synchronization ( we have to decode here! ) 
-decodedAfterSynch = synchronization(yReal, yImaginary, fsa, alpha, k, barkerCode);
+[ decodedAfterSynch, synchronizedSignal] = synchronization(yReal, yImaginary, fsa, alpha, k, barkerCode);
 
 % get the channel coded stream back
 stream = symbolDemapping(decodedAfterSynch, alphabet, method); 

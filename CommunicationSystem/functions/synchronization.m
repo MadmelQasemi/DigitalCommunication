@@ -10,7 +10,7 @@
 % und schließlich führt eine PLL den Symboltakt nach, um auch Strecken mit mehreren gleichen Symbolen überbrücken zu können.
 % Mit der MATLAB-Funktion sign() kann das Ausgangssignal der PLL noch in ein Rechtecksignal umgewandelt werden, um den Abtastzeitpunkt exakt zu bestimmen:
 
-function sym = synchronization(yReal, yImaginary, fsa, alpha, k, barkerCode)
+function sym, synchronizedSignal = synchronization(yReal, yImaginary, fsa, alpha, k, barkerCode)
 
 global debug_synchronization
 Nsam= 8;
@@ -49,25 +49,26 @@ clockImaginary = sign(synchedSignalToSampleImaginaary);  % clock for imaginary p
 
 % sample the signal after matched filter with the generated clock to synchronize 
 [symbolsRealSampled, symbolsImaginarySampled]= sampleWithClock(clockReal, clockImaginary, yReal, yImaginary ); 
+synchronizedSignal = symbolsRealSampled; 
 
 %%%%%%%%%%%%%%% Correction of the phase and Aamplitude after sampling %%%%%%%%%%%%%%%
 
-% Amplitude Correction 
-% factorReal = barkerCode(1:end)./realSignalFiltered(1:13);
-% factorImaginary = barkerCode(1:end)./imaginarySignalFiltered(1:13);
-% 
-% factorRealSum = sum(factorReal)/13;
-% factorImaginarySum = sum(factorImaginary)/13;
-% 
-% % get rid of the barker code and apply factor to the recieved Signal
-% 
-% synchronizedSignalReal =factorRealSum .* realSignalFiltered;
-% synchronizedSignalImaginary =factorImaginarySum .* imaginarySignalFiltered;
-% 
-% resultReal =synchronizedSignalReal(14:end);
-% resultImaginary =synchronizedSignalImaginary(14:end);
-% 
-% synchronizedSignal = [resultReal,resultImaginary]; 
+Amplitude Correction 
+factorReal = barkerCode(1:end)./realSignalFiltered(1:13);
+factorImaginary = barkerCode(1:end)./imaginarySignalFiltered(1:13);
+
+factorRealSum = sum(factorReal)/13;
+factorImaginarySum = sum(factorImaginary)/13;
+
+% get rid of the barker code and apply factor to the recieved Signal
+
+synchronizedSignalReal =factorRealSum .* realSignalFiltered;
+synchronizedSignalImaginary =factorImaginarySum .* imaginarySignalFiltered;
+
+resultReal =synchronizedSignalReal(14:end);
+resultImaginary =synchronizedSignalImaginary(14:end);
+
+%synchronizedSignal = [resultReal,resultImaginary]; 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
