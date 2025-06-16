@@ -276,3 +276,8 @@ title('signal representing the imaginary values + noise');
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % First, calculate and plot the magnitude of the spectrum of the complex signal after the pulse
 % shape filter (Figure 5).
+
+% plot signal with noise
+fig5 = figure('Name', 'Figure 4: After Synchronization', 'NumberTitle', 'off');  
+plot(xAchis, synchronizedSignal);
+title('signal representing the real values + noise');
