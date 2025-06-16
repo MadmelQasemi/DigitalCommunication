@@ -8,7 +8,7 @@
 % Output: a vector with alphabets that represent the bits from channel
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function bitsAsSymbols = symbolMapping(channelBits, alphabet, method, barkerCode)
+function resultWithBarker = symbolMapping(channelBits, alphabet, method, barkerCode)
 % to use the barkercode change bitsAsSymbols to resultWithBarker!
 
 % variables for calculation and control
@@ -16,7 +16,6 @@ global LookUpTable;
 global debug_symbolMapping
 len = length(alphabet);
 countBitPerSymbol = log2(len);
-
 
 % calculate the generator matrix
 genMatrix = generatorMatrix(countBitPerSymbol);

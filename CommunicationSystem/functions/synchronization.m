@@ -10,7 +10,7 @@
 % und schließlich führt eine PLL den Symboltakt nach, um auch Strecken mit mehreren gleichen Symbolen überbrücken zu können.
 % Mit der MATLAB-Funktion sign() kann das Ausgangssignal der PLL noch in ein Rechtecksignal umgewandelt werden, um den Abtastzeitpunkt exakt zu bestimmen:
 
-function sym, synchronizedSignal = synchronization(yReal, yImaginary, fsa, alpha, k, barkerCode)
+function [sym, synchronizedSignal] = synchronization(yReal, yImaginary, fsa, alpha, k, barkerCode)
 
 global debug_synchronization
 Nsam= 8;
@@ -26,6 +26,13 @@ n = (0:nBp-1);
 % calculate the |𝑠̂𝑝(𝑡)| (real and imaginary part seprated) 
 magnitudeSignalReal = abs(yReal);
 magnitudeSignalImaginary = abs(yImaginary);
+
+% to get the start of sampling
+corr = conv(magnitudeSignalReal, flipud(barkerCode));  % correlation
+[maxVal, maxIdx] = max(abs(corr));
+
+% Starte Synchronisation nach dem Barker-Code:
+startSample = maxIdx + floor(length(barkerCode)/2);
 
 % filter coefficients of bandpass filter
 BandPassFilter = cos(2*pi*fBp*n*Tsa);
@@ -48,25 +55,34 @@ clockImaginary = sign(synchedSignalToSampleImaginaary);  % clock for imaginary p
 
 
 % sample the signal after matched filter with the generated clock to synchronize 
-[symbolsRealSampled, symbolsImaginarySampled]= sampleWithClock(clockReal, clockImaginary, yReal, yImaginary ); 
+[symbolsRealSampled, symbolsImaginarySampled]= sampleWithClock(clockReal, clockImaginary, yReal, yImaginary, startSample); 
 synchronizedSignal = symbolsRealSampled; 
+
+% First, calculate and plot the magnitude of the spectrum of the complex signal after the pulse
+% shape filter (Figure 5).
+x = (1:length(synchronizedSignal));
+% plot signal with noise
+fig5 = figure('Name', 'Figure 5: After Synchronization', 'NumberTitle', 'off');  
+subplot(2,1,1);
+plot(x, synchronizedSignal);
+title('symbols after pll');
 
 %%%%%%%%%%%%%%% Correction of the phase and Aamplitude after sampling %%%%%%%%%%%%%%%
 
-Amplitude Correction 
-factorReal = barkerCode(1:end)./realSignalFiltered(1:13);
-factorImaginary = barkerCode(1:end)./imaginarySignalFiltered(1:13);
-
-factorRealSum = sum(factorReal)/13;
-factorImaginarySum = sum(factorImaginary)/13;
-
-% get rid of the barker code and apply factor to the recieved Signal
-
-synchronizedSignalReal =factorRealSum .* realSignalFiltered;
-synchronizedSignalImaginary =factorImaginarySum .* imaginarySignalFiltered;
-
-resultReal =synchronizedSignalReal(14:end);
-resultImaginary =synchronizedSignalImaginary(14:end);
+%Amplitude Correction 
+% factorReal = barkerCode(1:end)./realSignalFiltered(1:13);
+% factorImaginary = barkerCode(1:end)./imaginarySignalFiltered(1:13);
+% 
+% factorRealSum = sum(factorReal)/13;
+% factorImaginarySum = sum(factorImaginary)/13;
+% 
+% % get rid of the barker code and apply factor to the recieved Signal
+% 
+% synchronizedSignalReal =factorRealSum .* realSignalFiltered;
+% synchronizedSignalImaginary =factorImaginarySum .* imaginarySignalFiltered;
+% 
+% resultReal =synchronizedSignalReal(14:end);
+% resultImaginary =synchronizedSignalImaginary(14:end);
 
 %synchronizedSignal = [resultReal,resultImaginary]; 
 

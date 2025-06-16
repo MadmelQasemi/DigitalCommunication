@@ -50,8 +50,8 @@ barkerCode = 3 * [1 1 1 1 1 -1 -1 1 1 -1 1 -1 1]; % barkercode to define frames
 barkerCode = barkerCode'; 
 
 % message to send and recieve
-msg = 'In the quantum field all possibilities are real, until reality chooses one';
-
+%msg = 'In the quantum field all possibilities are real, until reality chooses one';
+msg ='ABCDEFG';
 % code it first 
 bits = sourceCoding(msg);
 
@@ -274,10 +274,10 @@ plot(xAchis, noisySignalImaginary);
 title('signal representing the imaginary values + noise');
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% First, calculate and plot the magnitude of the spectrum of the complex signal after the pulse
-% shape filter (Figure 5).
-
-% plot signal with noise
-fig5 = figure('Name', 'Figure 4: After Synchronization', 'NumberTitle', 'off');  
-plot(xAchis, synchronizedSignal);
-title('signal representing the real values + noise');
+% % First, calculate and plot the magnitude of the spectrum of the complex signal after the pulse
+% % shape filter (Figure 5).
+% x = (1:length(synchronizedSignal)-1);
+% % plot signal with noise
+% fig5 = figure('Name', 'Figure 5: After Synchronization', 'NumberTitle', 'off');  
+% plot(x, synchronizedSignal);
+% title('symbols after pll');
