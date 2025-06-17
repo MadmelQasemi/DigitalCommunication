@@ -52,6 +52,8 @@ if (method == "ASK")
             end
         end
     end
+
+    % here we add the barkercode 
     resultWithBarker(:,1)=[barkerCode(1:end,1);bitsAsSymbols(1:end,1)];
     disp('bits mapped int symbols via ASK method');
 

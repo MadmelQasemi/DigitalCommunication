@@ -35,8 +35,8 @@ else  % if method == "QAM16"
 end
 
 % amplify the signal to hear it better later
-realSymbolsVector = Nsam*upsample(realSymbolsVector,Nsam);
-imaginarySymbolVector =Nsam* upsample(imaginarySymbolVector,Nsam);
+realSymbolsVector = Nsam * upsample(realSymbolsVector,Nsam);
+imaginarySymbolVector = Nsam * upsample(imaginarySymbolVector,Nsam);
 
 % plot after seprating the real and imaginary parts
 disp('real symbol vector after the amplification and upsampling');

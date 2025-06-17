@@ -24,13 +24,13 @@ global debug_generatorMatrix
 global debug_synchronization
 global debug_symbolMapping
 
-debug_sourceCoding = false;
-debug_channelCoding = false;
-debug_generatorMatrix = false;
+debug_sourceCoding = true;
+debug_channelCoding = true;
+debug_generatorMatrix = true;
 debug_synchronization = true;
 sound_card = false;
-debug_symbolMapping = false;
-% debug_channelDecoding = false;
+debug_symbolMapping = true;
+debug_channelDecoding = true;
 
 if sound_card
     dac = audioDeviceWriter(fsa,"Device",'Lautsprecher (2- USB Audio CODEC)'); %output
@@ -76,7 +76,7 @@ k = 10;
 % alpha = 0.5;
 
 % pulseshape filter for sending 
-[signal, signalReal, signalImaginary] = pulseformFilter(symbols,alpha, method,fsa,Nsym, Nsam); 
+[signal, signalReal, signalImaginary] = pulseformFilter(symbols, alpha, method, fsa, Nsym, Nsam); 
 
 % modulation
 sTX = modulation(signalReal, signalImaginary);
@@ -86,10 +86,10 @@ if sound_card
     adc.record();
     disp('Start')
     pause(2)
-    
+
     dac.play([zeros(10000,1); sTX'; zeros(10000,1)]); 
     pause(2)
-    
+
     disp('Stop')
     adc.stop();
     sRX = adc.getaudiodata()';
@@ -109,15 +109,18 @@ demodulatedSignal = demodulation(sTX);
 [yReal, yImaginary] = matchedFilter(demodulatedSignal, alpha, fsa, Nsym, Nsam); 
 
 % Synchronization ( we have to decode here! ) 
-[ decodedAfterSynch, synchronizedSignal] = synchronization(yReal, yImaginary, fsa, alpha, k, barkerCode);
+[synchedReal, synchedImaginary, sampledR, sampledB] = synchronization(yReal, yImaginary, fsa, alpha, k, barkerCode);
+
+% decode after synchronisation
+decodedAfterSynch = decodeTheSymbols(sampledR, sampledB); 
 
 % get the channel coded stream back
 stream = symbolDemapping(decodedAfterSynch, alphabet, method); 
 
-% verify the code and extract the original bits
+%verify the code and extract the original bits
 rawBits = channelDecoding(stream); 
 
-% translate for non-binary speaking folks
+%translate for non-binary speaking folks
 message = sourceDecoding(rawBits);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -189,18 +192,18 @@ fig3 = figure('Name', 'Figure 3: Pulseform Filter', 'NumberTitle', 'off');      
 subplot(3,2,1);
 plot(xAchis, signalReal);
 hold on;
-stem(symbolTime,symbols(:,1));
-title('Real Impulse Response after Pulse Filter');
-xlabel('Time [Tsym]');
-ylabel('Real {y(n)}');
+% stem(symbolTime,symbols(:,1));
+% title('Real Impulse Response after Pulse Filter');
+% xlabel('Time [Tsym]');
+% ylabel('Real {y(n)}');
 
 subplot(3,2,2);                                     % imaginary part
 plot(xAchis,signalImaginary);
 hold on;
-stem(symbolTime,symbols(:,2));
-title('Imaginary Impulse Response after Pulse Filter');
-xlabel('Time [Tsym]');
-ylabel('Imaginary {y(n)}');
+% stem(symbolTime,symbols(:,2));
+% title('Imaginary Impulse Response after Pulse Filter');
+% xlabel('Time [Tsym]');
+% ylabel('Imaginary {y(n)}');
 
 % Plot of filter output after second filter
 x_axis = ((0:length(yReal)-1)*Tsa);                                             % real part
@@ -208,7 +211,7 @@ symbolTime_1 = (0:size(symbols,1)-1) * Tsym *(10^-3);
 subplot(3,2,3);  
 plot(x_axis,yReal);
 hold on;
-stem(symbolTime_1,decodedAfterSynch(:,1));
+%stem(symbolTime_1,decodedAfterSynch(:,1));
 title('Real Impulse Response after Matched Filter');
 xlabel('Time [Tsym]');
 ylabel('y(n)');
@@ -216,10 +219,10 @@ ylabel('y(n)');
 subplot(3,2,4);  
 plot(x_axis,yImaginary);
 hold on;
-stem(symbolTime_1,decodedAfterSynch(:,2));
-title('Imaginary Impulse Response after Matched Filter');
-xlabel('Time [Tsym]');
-ylabel('y(n)');
+% stem(symbolTime_1,decodedAfterSynch(:,2));
+% title('Imaginary Impulse Response after Matched Filter');
+% xlabel('Time [Tsym]');
+% ylabel('y(n)');
 
 samplePerSymbol = 2*Nsam;
 eyeX = (0:samplePerSymbol-1)*Tsa*(1e6);
