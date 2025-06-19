@@ -90,11 +90,17 @@ elseif (method == "16QAM")
 
     disp('bits mapped int symbols via 16QAM method [real/imaginary]');
     
-    % add barkercode at the beginning of both columns
-    realWithBarker(:,1)=[barkerCode(1:end,1);bitsAsSymbols(1:end,1)];
-    imaginaryWithBarker(:,1)=[barkerCode(1:end,1);bitsAsSymbols(1:end,2)];
-    resultWithBarker=[realWithBarker, imaginaryWithBarker];
+    
 
 end
 disp(bitsAsSymbols);
+
+% add barkercode at the beginning of both columns
+realWithBarker(:,1)=[barkerCode(1:end,1);bitsAsSymbols(1:end,1)];
+imaginaryWithBarker(:,1)=[barkerCode(1:end,1);bitsAsSymbols(1:end,2)];
+resultWithBarker=[realWithBarker, imaginaryWithBarker];
+
+disp('result with barkercode');
+disp(realWithBarker);
+
 end

@@ -26,7 +26,7 @@ symbols = zeros(rows,columns);
         symbols(i,2)=1;
     elseif(imaginary(i)>1.5)
         symbols(i,2)=3;
-    elseif(imaginary(i)<1.5)
+    elseif(imaginary(i)<-1.5)
         symbols(i,2)=-3;
     elseif(imaginary(i)>-1.5 && imaginary(i)<0)
         symbols(i,2)=-1;

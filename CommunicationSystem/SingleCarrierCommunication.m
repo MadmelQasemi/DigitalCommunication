@@ -50,8 +50,8 @@ barkerCode = 3 * [1 1 1 1 1 -1 -1 1 1 -1 1 -1 1]; % barkercode to define frames
 barkerCode = barkerCode'; 
 
 % message to send and recieve
-%msg = 'In the quantum field all possibilities are real, until reality chooses one';
-msg ='ABCDEFG';
+msg = 'In the quantum field all possibilities are real, until reality chooses one';
+
 % code it first 
 bits = sourceCoding(msg);
 
@@ -109,10 +109,10 @@ demodulatedSignal = demodulation(sTX);
 [yReal, yImaginary] = matchedFilter(demodulatedSignal, alpha, fsa, Nsym, Nsam); 
 
 % Synchronization ( we have to decode here! ) 
-[synchedReal, synchedImaginary, sampledR, sampledB] = synchronization(yReal, yImaginary, fsa, alpha, k, barkerCode);
+[synchedReal, synchedImaginary, sampledR, sampledI ] = synchronization(yReal, yImaginary, fsa, alpha, k, barkerCode);
 
 % decode after synchronisation
-decodedAfterSynch = decodeTheSymbols(sampledR, sampledB); 
+decodedAfterSynch = decodeTheSymbols(synchedReal, synchedImaginary); 
 
 % get the channel coded stream back
 stream = symbolDemapping(decodedAfterSynch, alphabet, method); 
@@ -192,21 +192,21 @@ fig3 = figure('Name', 'Figure 3: Pulseform Filter', 'NumberTitle', 'off');      
 subplot(3,2,1);
 plot(xAchis, signalReal);
 hold on;
-% stem(symbolTime,symbols(:,1));
-% title('Real Impulse Response after Pulse Filter');
-% xlabel('Time [Tsym]');
-% ylabel('Real {y(n)}');
+stem(symbolTime,symbols(:,1));
+title('Real Impulse Response after Pulse Filter');
+xlabel('Time [Tsym]');
+ylabel('Real {y(n)}');
 
 subplot(3,2,2);                                     % imaginary part
 plot(xAchis,signalImaginary);
 hold on;
-% stem(symbolTime,symbols(:,2));
-% title('Imaginary Impulse Response after Pulse Filter');
-% xlabel('Time [Tsym]');
-% ylabel('Imaginary {y(n)}');
+stem(symbolTime,symbols(:,2));
+title('Imaginary Impulse Response after Pulse Filter');
+xlabel('Time [Tsym]');
+ylabel('Imaginary {y(n)}');
 
 % Plot of filter output after second filter
-x_axis = ((0:length(yReal)-1)*Tsa);                                             % real part
+x_axis = ((0:length(yReal)-1)*Tsa);                   % real part
 symbolTime_1 = (0:size(symbols,1)-1) * Tsym *(10^-3);
 subplot(3,2,3);  
 plot(x_axis,yReal);
@@ -277,10 +277,3 @@ plot(xAchis, noisySignalImaginary);
 title('signal representing the imaginary values + noise');
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% % First, calculate and plot the magnitude of the spectrum of the complex signal after the pulse
-% % shape filter (Figure 5).
-% x = (1:length(synchronizedSignal)-1);
-% % plot signal with noise
-% fig5 = figure('Name', 'Figure 5: After Synchronization', 'NumberTitle', 'off');  
-% plot(x, synchronizedSignal);
-% title('symbols after pll');

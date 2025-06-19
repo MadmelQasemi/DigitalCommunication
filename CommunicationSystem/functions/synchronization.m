@@ -57,50 +57,31 @@ legend('Clock', 'Signal');
 % the impulse response from channel:
 % Y(f) = H(f).X(f)  <=> H(f) = Y(f)/X(f) 
 
-% take the input
-input = fft(barkerCode); 
+% take one input
+input = barkerCode(3); 
 
-% take the output
-outputReal = fft(sampledReal(1:13));
-outputImaginary = fft(sampledImaginary(1:13));
+% take one output
+output = sampledReal(3); 
 
-% Calculate the Impulseresponse of the channel in frequency spectrum 
-hfReal = outputReal./input;
-hfImaginary = outputImaginary./input;
+% Calculate the factor
+factor = output/input; 
+
 epsilon = 0.000001; 
 
-% reciprocal of the impulsereponses
-for n = 1:length(hfReal)
-    % we do not want to divide by zero ;)
-    if (hfReal(n)<epsilon)
-        hfReal(n) =epsilon; 
+if factor < epsilon
+    factor = epsilon; 
+    disp('Error in correction!'); 
+    synchedReal = sampledReal;  % just to avoid the errors 
+    synchedImaginary = sampledImaginary;
+else
+    factor = 1/factor; 
+    for i = 1: length(sampledReal)
+        synchedReal(i)= sampledReal(i)*factor;
+        synchedImaginary(i)= sampledImaginary(i)*factor; 
     end
-    if (hfImaginary(n)<epsilon)
-        hfImaginary(n)= epsilon; 
-    end
-    % we want to take away the influence of the channel so the division
-    realHfinverted(n) = 1/hfReal(n); 
-    imaginaryHfinverted(n) = 1/hfImaginary(n); 
 end
 
-% bring it in time domain for convolution
- % did not work -> huge values
-%zeroFilterReal = ifft(realHfinverted);   
-%zeroFilterImaginary = ifft(imaginaryHfinverted); 
-
-% chat gpt suggestion: %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-zeroFilterReal = ifft(realHfinverted, 'symmetric');  % nur wenn das Signal reell ist
-zeroFilterImaginary = ifft(imaginaryHfinverted, 'symmetric'); 
-
-zeroFilterReal = zeroFilterReal / norm(zeroFilterReal); 
-zeroFilterImaginary = zeroFilterImaginary / norm(zeroFilterImaginary); 
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-synchedReal = conv(sampledReal, zeroFilterReal,'same');
-synchedImaginary = conv(sampledImaginary, zeroFilterImaginary,'same'); 
-
+% take the barkercode out then!
 synchedReal = synchedReal(14:end); 
 synchedImaginary = synchedImaginary(14:end);
 sampledReal = sampledReal(14:end); 
