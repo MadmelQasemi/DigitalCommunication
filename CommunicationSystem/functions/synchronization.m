@@ -46,9 +46,6 @@ synchedSignalToSampleImaginaary = pll(bandPassedImaginary, Nsam, alpha, k);
 clockReal = sign(synchedSignalToSampleReal);             % clock for real part after matched filter 
 clockImaginary = sign(synchedSignalToSampleImaginaary);  % clock for imaginary part after matched filter 
 
-plot(clockReal); hold on;
-plot(yReal); hold on; 
-legend('Clock', 'Signal');
 
 % sample the signal after matched filter with the generated clock 
 [sampledReal, sampledImaginary] = sampleWithClock(clockReal, clockImaginary, yReal, yImaginary); 
@@ -60,42 +57,49 @@ legend('Clock', 'Signal');
 % take one input (randomly chose the third one)
 input = barkerCode(3); 
 
-% take one output
-outputR = sampledReal(3); 
-outputI = sampledImaginary(3); 
+% complex signal 
+sampledImaginary = sampledImaginary.*1i; 
+output = sampledReal + sampledImaginary; 
 
-% Calculate the factor
-factorR = outputR/input; 
-factorI = outputI/input, 
+factor = (barkerCode(3)+barkerCode(3)*1i)/output(3); 
 
-epsilon = 0.000001; 
-
-if factorR < epsilon
-    factorR = epsilon; 
-    disp('Error in correction!'); 
-    synchedReal = sampledReal;  % just to avoid the errors 
-else
-    factorR = 1/factorR; 
-    for i = 1: length(sampledReal)
-        synchedReal(i)= sampledReal(i)*factorR;
-    end
+for i = 1: length(output)
+    output(i)= output(i)*factor; 
 end
 
-if factorI < epsilon
-    factorI = epsilon; 
-    disp('Error in correction!'); 
-    synchedImaginary = sampledImaginary;
-else
-    factorI = 1/factorI; 
-    for i = 1: length(sampledReal)
-        synchedImaginary(i)= sampledImaginary(i)*factorI; 
-    end
-end
+
 
 % take the barkercode out then!
-synchedReal = synchedReal(14:end); 
-synchedImaginary = synchedImaginary(14:end);
-sampledReal = sampledReal(14:end); 
-sampledImaginary = sampledImaginary(14:end); 
+signal = output(14:end); 
+clockReal = clockReal(14:end); 
+clockImaginary = clockImaginary(14:end); 
+
+synchedReal = real(signal); 
+synchedImaginary =imag(signal); 
+
+len = min([length(clockReal), length(synchedReal)]);
+x_axis = 0:len-1;
+
+subplot(2,1,1); 
+plot(x_axis, clockReal(1:len)); hold on;
+plot(x_axis, synchedReal(1:len));
+
+subplot(2,1,2); 
+plot(x_axis, clockImaginary(1:len)); hold on;
+plot(x_axis, synchedImaginary(1:len));
+
+legend('Clock', 'Signal');
+
+
+% subplot(2,1,1); 
+% plot(clockReal); hold on;
+% plotyReal =synchedReal; 
+% plot(plotyReal); 
+% 
+% subplot(2,1,2); 
+% plot(clockImaginary); hold on;
+% plotyImaginary =synchedImaginary; 
+% plot(plotyImaginary); 
+% legend('Clock', 'Signal');
 
 end

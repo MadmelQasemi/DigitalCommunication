@@ -256,9 +256,9 @@ for n = 1:Nsam:max
     plot(eyeX,symbolSamples);
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+combinedMatch = yReal+ yImaginary.*1i; 
 % scatterplot
-scatterplot(decodedAfterSynch);
+scatterplot(combinedMatch);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Figure 4 Plotten alle bisherigen Diagramme auf der Empfängerseite nun mit den verrauschten Signalen. (Figure 3+4)
@@ -274,8 +274,6 @@ noisySignalImaginary = awgn(noisySignalImaginary,10);
 fig4 = figure('Name', 'Figure 4: Matched Filter', 'NumberTitle', 'off');  
 subplot(2,1,1);
 plot(xAchis, noisySignalReal);
-hold on;
-plot(xAchis,clockReal);
 title('signal representing the real values + noise');
 
 subplot(2,1,2);
