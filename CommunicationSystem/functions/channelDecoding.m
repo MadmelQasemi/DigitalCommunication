@@ -102,7 +102,7 @@ for matrices = 1:matrixNum
                 disp('incorrect column');
                 disp(findTheFailedCol);
                 colError = findTheFailedCol;
-                rawBits(rowError,colError) = ~rawBits(rowError,colError);
+               % rawBits(rowError,colError) = ~rawBits(rowError,colError);
                 disp('correction  compelete');
             end
             currentLine = currentLine - 6;

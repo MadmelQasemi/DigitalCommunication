@@ -6,7 +6,7 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function [symbolsReal,symbolsImaginary] = sampleWithClock(clockReal, clockImaginary, realSignal, imaginarySignal)
-    
+    % should we use clock imaginary in a seperate loop too?
     indexReal = 1;
     indexImaginary = 1;
 

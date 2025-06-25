@@ -10,7 +10,7 @@
 % und schließlich führt eine PLL den Symboltakt nach, um auch Strecken mit mehreren gleichen Symbolen überbrücken zu können.
 % Mit der MATLAB-Funktion sign() kann das Ausgangssignal der PLL noch in ein Rechtecksignal umgewandelt werden, um den Abtastzeitpunkt exakt zu bestimmen:
 
-function [synchedReal, synchedImaginary, sampledReal, sampledImaginary] = synchronization(yReal, yImaginary, fsa, alpha, k, barkerCode)
+function [synchedReal, synchedImaginary, sampledReal, sampledImaginary,clockReal,clockImaginary] = synchronization(yReal, yImaginary, fsa, alpha, k, barkerCode)
 
 global debug_synchronization
 Nsam= 8;
@@ -57,27 +57,38 @@ legend('Clock', 'Signal');
 % the impulse response from channel:
 % Y(f) = H(f).X(f)  <=> H(f) = Y(f)/X(f) 
 
-% take one input
+% take one input (randomly chose the third one)
 input = barkerCode(3); 
 
 % take one output
-output = sampledReal(3); 
+outputR = sampledReal(3); 
+outputI = sampledImaginary(3); 
 
 % Calculate the factor
-factor = output/input; 
+factorR = outputR/input; 
+factorI = outputI/input, 
 
 epsilon = 0.000001; 
 
-if factor < epsilon
-    factor = epsilon; 
+if factorR < epsilon
+    factorR = epsilon; 
     disp('Error in correction!'); 
     synchedReal = sampledReal;  % just to avoid the errors 
+else
+    factorR = 1/factorR; 
+    for i = 1: length(sampledReal)
+        synchedReal(i)= sampledReal(i)*factorR;
+    end
+end
+
+if factorI < epsilon
+    factorI = epsilon; 
+    disp('Error in correction!'); 
     synchedImaginary = sampledImaginary;
 else
-    factor = 1/factor; 
+    factorI = 1/factorI; 
     for i = 1: length(sampledReal)
-        synchedReal(i)= sampledReal(i)*factor;
-        synchedImaginary(i)= sampledImaginary(i)*factor; 
+        synchedImaginary(i)= sampledImaginary(i)*factorI; 
     end
 end
 

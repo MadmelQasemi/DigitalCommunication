@@ -24,19 +24,14 @@ global debug_generatorMatrix
 global debug_synchronization
 global debug_symbolMapping
 
-debug_sourceCoding = true;
-debug_channelCoding = true;
-debug_generatorMatrix = true;
-debug_synchronization = true;
-sound_card = false;
-debug_symbolMapping = true;
-debug_channelDecoding = true;
+debug_sourceCoding = false;
+debug_channelCoding = false;
+debug_generatorMatrix = false;
+debug_synchronization = false;
+sound_card = true;
+debug_symbolMapping = false;
+debug_channelDecoding = false;
 
-if sound_card
-    dac = audioDeviceWriter(fsa,"Device",'Lautsprecher (2- USB Audio CODEC)'); %output
-    microphoneID = audiodevinfo(1,'Mikrofon (USB Audio CODEC )');
-    adc = audiorecorder(fsa,16,1,microphoneID); %input
-end
 
 % variables
 global LookUpTable;
@@ -48,6 +43,12 @@ Tsa = 1 / fsa;            % periode of sampling
 alphabet = [-3,-1,1,3];   % symbols for mapping
 barkerCode = 3 * [1 1 1 1 1 -1 -1 1 1 -1 1 -1 1]; % barkercode to define frames
 barkerCode = barkerCode'; 
+
+if sound_card
+    dac = audioDeviceWriter(fsa,"Device",'Lautsprecher (3- USB Audio CODEC )'); %output
+    microphoneID = audiodevinfo(1,'Mikrofon (2- USB Audio CODEC )');
+    adc = audiorecorder(fsa,16,1,microphoneID); %input
+end
 
 % message to send and recieve
 msg = 'In the quantum field all possibilities are real, until reality chooses one';
@@ -64,7 +65,7 @@ end
 bitsForChannel = channelCoding(bits); 
 
 % choose your pain
-% method = "ASK"; 
+%method = "ASK"; 
 method = "16QAM"; 
 
 % mapping the bits into symbols
@@ -80,6 +81,7 @@ k = 10;
 
 % modulation
 sTX = modulation(signalReal, signalImaginary);
+sTX = 0.2.*sTX; % attenuate the amplitude
 
 if sound_card
 % we send it into the channel with the help of the soundcard
@@ -98,18 +100,20 @@ end
 % simulate sRX to test if the extraction is correct
 %sRX = [zeros(10000,1); sTX'; zeros(10000,1)];
 
-%extractedMsg = cutOffMsg(sRX,sTX); % cheating by using sTX
+extractedMsg = cutOffMsg(sRX,sTX); % cheating by using sTX
 
 % we have to cut around (3.4 to 3.6) theshold over 0.5 
 
+
+
 % demodulation
-demodulatedSignal = demodulation(sTX);
+demodulatedSignal = demodulation(extractedMsg);
 
 % matched filter
 [yReal, yImaginary] = matchedFilter(demodulatedSignal, alpha, fsa, Nsym, Nsam); 
 
 % Synchronization ( we have to decode here! ) 
-[synchedReal, synchedImaginary, sampledR, sampledI ] = synchronization(yReal, yImaginary, fsa, alpha, k, barkerCode);
+[synchedReal, synchedImaginary, sampledR, sampledI,clockReal,clockImaginary ] = synchronization(yReal, yImaginary, fsa, alpha, k, barkerCode);
 
 % decode after synchronisation
 decodedAfterSynch = decodeTheSymbols(synchedReal, synchedImaginary); 
@@ -117,10 +121,10 @@ decodedAfterSynch = decodeTheSymbols(synchedReal, synchedImaginary);
 % get the channel coded stream back
 stream = symbolDemapping(decodedAfterSynch, alphabet, method); 
 
-%verify the code and extract the original bits
+% verify the code and extract the original bits
 rawBits = channelDecoding(stream); 
 
-%translate for non-binary speaking folks
+% translate for non-binary speaking folks
 message = sourceDecoding(rawBits);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -270,6 +274,8 @@ noisySignalImaginary = awgn(noisySignalImaginary,10);
 fig4 = figure('Name', 'Figure 4: Matched Filter', 'NumberTitle', 'off');  
 subplot(2,1,1);
 plot(xAchis, noisySignalReal);
+hold on;
+plot(xAchis,clockReal);
 title('signal representing the real values + noise');
 
 subplot(2,1,2);

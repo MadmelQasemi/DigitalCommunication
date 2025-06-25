@@ -8,12 +8,10 @@
 
 function extractedMsg = cutOffMsg(sRX,sTX)
 signalWidth= length(sTX);
-
-for i = 1:length(sRX) % as soon as the message appears save the signal
-    if sRX(i) > 0.25 % some choosen value as threshold
+beginIndex = 0; i = 1;
+while(sRX(i) < 0.2) % as soon as the message appears save the signal
         beginIndex = i; 
-        break; 
-    end
+        i=i+1; 
 end
 
 for n = 1:signalWidth
