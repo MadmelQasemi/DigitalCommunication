@@ -97,14 +97,7 @@ if sound_card
     sRX = adc.getaudiodata()';
 end
 
-% simulate sRX to test if the extraction is correct
-%sRX = [zeros(10000,1); sTX'; zeros(10000,1)];
-
 extractedMsg = cutOffMsg(sRX,sTX); % cheating by using sTX
-
-% we have to cut around (3.4 to 3.6) theshold over 0.5 
-
-
 
 % demodulation
 demodulatedSignal = demodulation(extractedMsg);

@@ -67,8 +67,6 @@ for i = 1: length(output)
     output(i)= output(i)*factor; 
 end
 
-
-
 % take the barkercode out then!
 signal = output(14:end); 
 clockReal = clockReal(14:end); 
@@ -91,15 +89,5 @@ plot(x_axis, synchedImaginary(1:len));
 legend('Clock', 'Signal');
 
 
-% subplot(2,1,1); 
-% plot(clockReal); hold on;
-% plotyReal =synchedReal; 
-% plot(plotyReal); 
-% 
-% subplot(2,1,2); 
-% plot(clockImaginary); hold on;
-% plotyImaginary =synchedImaginary; 
-% plot(plotyImaginary); 
-% legend('Clock', 'Signal');
 
 end

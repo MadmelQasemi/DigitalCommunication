@@ -9,6 +9,8 @@
 
 function signalToSend = modulation(signalReal,signalImaginary)
 
+global debug_modulation; 
+
 % defining the variables needed
 fsa = 48000;
 Tsa = 1/fsa;
@@ -35,6 +37,7 @@ signalToSend = signalRealModulated + signalImaginaryModulated;
 % signalToSendNoisy = signalToSend + p_N * randn(size(signalToSend)); 
 % signalToSend = signalToSendNoisy; 
 
+if debug_modulation
 % plot the original symbols and the signal that suppose to transfer them  
 figure;                                             % real part
 subplot(3,1,1);
@@ -48,5 +51,5 @@ title('imaginary signal after multiplication');
 subplot(3,1,3);                                     % addition of both
 plot(time, signalToSend);
 title('signal after modulation');
-
+end
 end
