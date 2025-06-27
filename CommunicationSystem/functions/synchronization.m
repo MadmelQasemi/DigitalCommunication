@@ -5,12 +5,8 @@
 % Datum: 22.04.2025
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% 1. Zur Symboltaktrückgewinnung wird also zunächst der Betrag des Basisbandsignals |𝑠̂𝑝(𝑡)| genommen.
-% Anschließend wird dann zur groben Vorselektion ein Bandpass angewendet
-% und schließlich führt eine PLL den Symboltakt nach, um auch Strecken mit mehreren gleichen Symbolen überbrücken zu können.
-% Mit der MATLAB-Funktion sign() kann das Ausgangssignal der PLL noch in ein Rechtecksignal umgewandelt werden, um den Abtastzeitpunkt exakt zu bestimmen:
 
-function [synchedReal, synchedImaginary, sampledReal, sampledImaginary,clockReal,clockImaginary] = synchronization(yReal, yImaginary, fsa, alpha, k, barkerCode)
+function [synchedReal, synchedImaginary, clockReal,clockImaginary] = synchronization(yReal, yImaginary, fsa, alpha, k, barkerCode)
 
 global debug_mode
 Nsam= 8;
@@ -87,7 +83,5 @@ plot(x_axis, clockImaginary(1:len)); hold on;
 plot(x_axis, synchedImaginary(1:len));
 
 legend('Clock', 'Signal');
-
-
 
 end

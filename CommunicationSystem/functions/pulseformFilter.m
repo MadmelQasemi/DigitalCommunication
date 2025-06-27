@@ -1,4 +1,4 @@
-%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Name: Brianna, Madmel
 % Date: 17.05.2025
 % This function apply the pulseshape filter to the symbols for a
@@ -8,7 +8,7 @@
 % Output: signal after convolution with root raised cosine
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-function [signal,signalReal, signalImaginary] = pulseformFilter(symbols, alpha, method,fsa, Nsym, Nsam)
+function [signalReal, signalImaginary] = pulseformFilter(symbols, alpha, method,fsa, Nsym, Nsam)
 global debug_mode;  % global variable for debugging
 % variables needed
 Tsym = 1 / Nsym;  % time per symbol

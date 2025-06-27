@@ -7,9 +7,11 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function extractedMsg = cutOffMsg(sRX,sTX)
+
 signalWidth= length(sTX);
 beginIndex = 0; i = 1;
-while(sRX(i) < 0.2) % as soon as the message appears save the signal
+% as soon as the message appears save the signal
+while(sRX(i) < 0.2) 
         beginIndex = i; 
         i=i+1; 
 end
@@ -19,13 +21,13 @@ for n = 1:signalWidth
     beginIndex=beginIndex+1; 
 end
 
-% Optional: Plot of recieved signal that we want
-% to extract the message from
+% Plot of recieved signal that we want to extract the message from
+% comment out to show the whole message through channel
 
-figure;
-plot(abs(sRX));
-title('Absoluter Wert des simulierten Empfangssignals');
-xlabel('Sample Index');
-ylabel('|sRX|');
+% figure;
+% plot(abs(sRX));
+% title('Absoluter Wert des simulierten Empfangssignals');
+% xlabel('Sample Index');
+% ylabel('|sRX|');
 
 end
