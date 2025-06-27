@@ -74,7 +74,6 @@ sTX = modulation(signalReal, signalImaginary);
 if sound_card
     sTX = 0.2.*sTX; % attenuate the amplitude
 
-% we send it into the channel with the help of the soundcard
     adc.record();
     disp('Start')
     pause(2)
@@ -92,7 +91,6 @@ end
 
 % demodulation
 if ~sound_card
-demodulatedSignal = demodulation(sTX);
 end
 % matched filter
 [yReal, yImaginary] = matchedFilter(demodulatedSignal, alpha, fsa, Nsym, Nsam); 

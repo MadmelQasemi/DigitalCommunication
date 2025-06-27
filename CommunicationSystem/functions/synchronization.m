@@ -20,9 +20,7 @@ fBp = 1/Tsym;
 nBp = 16;
 n = (0:nBp-1);
 
-% generate Symbolclock and apply to signal after matched filter 
 
-% calculate the |𝑠̂𝑝(𝑡)| (real and imaginary part seprated from the matched filter) 
 magnitudeSignalReal = abs(yReal);
 magnitudeSignalImaginary = abs(yImaginary);
 
@@ -32,7 +30,6 @@ BandPassFilter= BandPassFilter';
 
 % apply bandpass to the real and imaginary part of |𝑠̂𝑝(𝑡)|
 bandPassedReal = conv(magnitudeSignalReal, BandPassFilter, 'same');
-bandPassedImaginary = conv(magnitudeSignalImaginary,BandPassFilter, 'same'); 
 
 if debug_mode
     disp(bandPassedReal);
@@ -43,50 +40,26 @@ synchedSignalToSampleReal = pll(bandPassedReal, Nsam, alpha, k);
 synchedSignalToSampleImaginaary = pll(bandPassedImaginary, Nsam, alpha, k);
 
 % create clk with pll output
-clockReal = sign(synchedSignalToSampleReal);             % clock for real part after matched filter 
-clockImaginary = sign(synchedSignalToSampleImaginaary);  % clock for imaginary part after matched filter 
 
 
-% sample the signal after matched filter with the generated clock 
-[sampledReal, sampledImaginary] = sampleWithClock(clockReal, clockImaginary, yReal, yImaginary); 
 
-% Correction of the phase and Aamplitude after sampling with 
 % the impulse response from channel:
-% Y(f) = H(f).X(f)  <=> H(f) = Y(f)/X(f) 
 
 % take one input (randomly chose the third one)
-input = barkerCode(3); 
 
-% complex signal 
-sampledImaginary = sampledImaginary.*1i; 
-output = sampledReal + sampledImaginary; 
 
-factor = (barkerCode(3)+barkerCode(3)*1i)/output(3); 
 
 for i = 1: length(output)
-    output(i)= output(i)*factor; 
 end
 
 % take the barkercode out then!
-signal = output(14:end); 
-clockReal = clockReal(14:end); 
-clockImaginary = clockImaginary(14:end); 
 
-synchedReal = real(signal); 
-synchedImaginary =imag(signal); 
 
 len = min([length(clockReal), length(synchedReal)]);
 x_axis = 0:len-1;
 
 if debug_mode
-subplot(2,1,1); 
-plot(x_axis, clockReal(1:len)); hold on;
-plot(x_axis, synchedReal(1:len));
 
-subplot(2,1,2); 
-plot(x_axis, clockImaginary(1:len)); hold on;
-plot(x_axis, synchedImaginary(1:len));
 
-legend('Clock', 'Signal');
 end
 end
