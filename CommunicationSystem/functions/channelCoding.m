@@ -8,7 +8,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function vecOfParities = channelCoding(bits)
-global debug_channelCoding
+global debug_mode
 
 [numberOfRows, numberOfCols]= size(bits); % get the dimensions of the message
 
@@ -57,7 +57,7 @@ while mod(numberOfRows,7) == 0 && numberOfRows > 0
         col = 0;
     end
    
-    if debug_channelCoding
+    if debug_mode
         disp('matricies after channel coding with parities');
         disp(parityMatrix);
     end
@@ -67,7 +67,7 @@ while mod(numberOfRows,7) == 0 && numberOfRows > 0
 
 end
 
-if debug_channelCoding
+if debug_mode
     disp('matrix turned into vector');
     disp(vecOfParities);
 end

@@ -13,7 +13,7 @@ function resultWithBarker = symbolMapping(channelBits, alphabet, method, barkerC
 
 % variables for calculation and control
 global LookUpTable;
-global debug_symbolMapping
+global debug_mode;
 len = length(alphabet);
 countBitPerSymbol = log2(len);
 
@@ -22,7 +22,7 @@ genMatrix = generatorMatrix(countBitPerSymbol);
 bits = (0:len-1);
 bitOrder = dec2bin(bits, countBitPerSymbol)-'0';
 
-if debug_symbolMapping
+if debug_mode
     disp('possible bits');
     disp(bitOrder);
 end
@@ -31,7 +31,9 @@ end
 gray = multToGray(len, bitOrder,genMatrix);
 
 % generate Look up table
-disp('symbols with the bit combination they represent');
+if debug_mode
+    disp('symbols with the bit combination they represent');
+end
 LUT = genLut(len, countBitPerSymbol, alphabet, gray);
 LookUpTable = LUT;
 
@@ -93,14 +95,17 @@ elseif (method == "16QAM")
     
 
 end
+if debug_mode
 disp(bitsAsSymbols);
+end
 
 % add barkercode at the beginning of both columns
 realWithBarker(:,1)=[barkerCode(1:end,1);bitsAsSymbols(1:end,1)];
 imaginaryWithBarker(:,1)=[barkerCode(1:end,1);bitsAsSymbols(1:end,2)];
 resultWithBarker=[realWithBarker, imaginaryWithBarker];
 
-disp('result with barkercode');
-disp(realWithBarker);
-
+if debug_mode
+    disp('result with barkercode');
+    disp(realWithBarker);
+end
 end

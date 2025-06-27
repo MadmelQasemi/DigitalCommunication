@@ -9,7 +9,7 @@
 
 function signalToSend = modulation(signalReal,signalImaginary)
 
-global debug_modulation; 
+global debug_mode; 
 
 % defining the variables needed
 fsa = 48000;
@@ -37,7 +37,7 @@ signalToSend = signalRealModulated + signalImaginaryModulated;
 % signalToSendNoisy = signalToSend + p_N * randn(size(signalToSend)); 
 % signalToSend = signalToSendNoisy; 
 
-if debug_modulation
+if debug_mode
 % plot the original symbols and the signal that suppose to transfer them  
 figure;                                             % real part
 subplot(3,1,1);

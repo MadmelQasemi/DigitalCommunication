@@ -8,7 +8,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function stream = symbolDemapping(symbolvector, alphabet, method)
-global LookUpTable; 
+global LookUpTable;
+global debug_mode; 
 
 if (method == "ASK")
     lenStream = size(symbolvector,1);
@@ -23,8 +24,10 @@ if (method == "ASK")
             end
         end
     end
+    if debug_mode
     disp('demaped values');
     disp(stream); 
+    end
   
 elseif(method == "16QAM")
     lenStream = size(symbolvector,1); % returns the number of the rows
@@ -42,8 +45,10 @@ elseif(method == "16QAM")
         end
     end
 
+if debug_mode
     disp('demaped values');
-    disp(stream);         
+    disp(stream);  
+end       
 
 end
 end

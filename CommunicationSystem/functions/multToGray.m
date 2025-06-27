@@ -7,6 +7,8 @@
 % Output: generator matrix with given dimension for gray coding
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function gray = multToGray(numRows,bits,matrix)
+global debug_mode
+
 % multiply each row to the genMatrix and save
 for n = 1:numRows
     % save the lines 
@@ -16,6 +18,9 @@ for n = 1:numRows
     % write in the result matrix
     gray(n,:)= temp; 
 end
-disp('bits after the Hamming distance is applied');
-disp(gray)
+
+if debug_mode
+    disp('bits after the Hamming distance is applied');
+    disp(gray)
+end
 end

@@ -13,7 +13,7 @@
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function msgAsCode = sourceDecoding(bits)
-
+global debug_mode
 
 msgAsCode = [];
 [rows, columns]= size(bits);
@@ -23,6 +23,8 @@ character = char(dec);
 msgAsCode = [msgAsCode character];
 end
 
+if debug_mode
 disp('recieved:');
 disp(msgAsCode); 
+end
 end

@@ -9,7 +9,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 function [signal,signalReal, signalImaginary] = pulseformFilter(symbols, alpha, method,fsa, Nsym, Nsam)
-
+global debug_mode;  % global variable for debugging
 % variables needed
 Tsym = 1 / Nsym;  % time per symbol
 Tsa = 1/fsa;      % sample time
@@ -38,11 +38,13 @@ end
 realSymbolsVector = Nsam * upsample(realSymbolsVector,Nsam);
 imaginarySymbolVector = Nsam * upsample(imaginarySymbolVector,Nsam);
 
-% plot after seprating the real and imaginary parts
-disp('real symbol vector after the amplification and upsampling');
-disp(realSymbolsVector);
-disp('imaginary symbol vector after the amplification and upsampling');
-disp(imaginarySymbolVector);
+if debug_mode
+    % plot after seprating the real and imaginary parts
+    disp('real symbol vector after the amplification and upsampling');
+    disp(realSymbolsVector);
+    disp('imaginary symbol vector after the amplification and upsampling');
+    disp(imaginarySymbolVector);
+end
 
 % the root raised cos coefficients are given by the following function
 h = rcosdesign(alpha,Nsym,Nsam,'sqrt');

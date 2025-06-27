@@ -1,5 +1,6 @@
 function symbols = decodeTheSymbols(real, imaginary)
-    
+global debug_mode
+
 real = real'; 
 imaginary = imaginary'; 
 
@@ -33,9 +34,10 @@ symbols = zeros(rows,columns);
     end
  end
 
+if debug_mode
  disp('Ergebnis aus gesamplete Symbole');
  disp(symbols);
- 
+end
  
 end
 

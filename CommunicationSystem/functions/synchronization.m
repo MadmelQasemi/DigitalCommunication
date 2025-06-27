@@ -12,7 +12,7 @@
 
 function [synchedReal, synchedImaginary, sampledReal, sampledImaginary,clockReal,clockImaginary] = synchronization(yReal, yImaginary, fsa, alpha, k, barkerCode)
 
-global debug_synchronization
+global debug_mode
 Nsam= 8;
 Tsa = 1/fsa;
 Tsym = Nsam * Tsa;
@@ -34,7 +34,7 @@ BandPassFilter= BandPassFilter';
 bandPassedReal = conv(magnitudeSignalReal, BandPassFilter, 'same');
 bandPassedImaginary = conv(magnitudeSignalImaginary,BandPassFilter, 'same'); 
 
-if debug_synchronization
+if debug_mode
     disp(bandPassedReal);
 end
 
