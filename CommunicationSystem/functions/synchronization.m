@@ -78,6 +78,7 @@ synchedImaginary =imag(signal);
 len = min([length(clockReal), length(synchedReal)]);
 x_axis = 0:len-1;
 
+if debug_mode
 subplot(2,1,1); 
 plot(x_axis, clockReal(1:len)); hold on;
 plot(x_axis, synchedReal(1:len));
@@ -87,7 +88,5 @@ plot(x_axis, clockImaginary(1:len)); hold on;
 plot(x_axis, synchedImaginary(1:len));
 
 legend('Clock', 'Signal');
-
-
-
+end
 end
