@@ -20,8 +20,6 @@ global debug_mode
 debug_mode = false;
 sound_card = false;
 
-
-
 % variables
 global LookUpTable;
 fsa = 48000;              % sample frequency
@@ -30,8 +28,9 @@ Nsam = 8;                 % number of the samples for one symbol
 Tsym = 1 / Nsym;          % time for one symbol  
 Tsa = 1 / fsa;            % periode of sampling  
 alphabet = [-3,-1,1,3];   % symbols for mapping
-barkerCode = 3 * [1 1 1 1 1 -1 -1 1 1 -1 1 -1 1]; % barkercode to define frames
+barkerCode = [1 1 1 1 1 -1 -1 1 1 -1 1 -1 1]; % barkercode to define frames
 barkerCode = barkerCode'; 
+alphas = [0, 0.4, 0.7, 0.9];
 
 if sound_card
     dac = audioDeviceWriter(fsa,"Device",'Lautsprecher (3- USB Audio CODEC )'); %output
@@ -57,16 +56,19 @@ bitsForChannel = channelCoding(bits);
 %method = "ASK"; 
 method = "16QAM"; 
 
+if method == "16QAM" 
+    barkerCode = 3 .* barkerCode;
+end
+
 % mapping the bits into symbols
 symbols = symbolMapping(bitsForChannel, alphabet, method, barkerCode);
 
 % choose your alpha
 alpha = 0.99; 
 k = 10; 
-% alpha = 0.5;
 
 % pulseshape filter for sending 
-[signal, signalReal, signalImaginary] = pulseformFilter(symbols, alpha, method, fsa, Nsym, Nsam); 
+[signalReal, signalImaginary] = pulseformFilter(symbols, alpha, method, fsa, Nsym, Nsam); 
 
 % modulation
 sTX = modulation(signalReal, signalImaginary);
@@ -91,7 +93,9 @@ end
 
 % demodulation
 if ~sound_card
+    demodulatedSignal = demodulation(sTX);
 end
+
 % matched filter
 [yReal, yImaginary] = matchedFilter(demodulatedSignal, alpha, fsa, Nsym, Nsam); 
 
@@ -111,252 +115,6 @@ rawBits = channelDecoding(stream);
 message = sourceDecoding(rawBits);
 disp("Received Message: ");
 disp(message)
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% figures and diagrams
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% figure 1: Mapping - Plotten Sie die komplexen Symbole als Konstellationsdiagramm
-scatterplot(symbols);
-title('Figure 1:Constellation after Mapping');
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Plotten Sie in eine Figure und zwei Subplots die Impulsantwort des Filters und die 
-% Übertragungsfunktion zum Vergleich jeweils für unterschiedliche Werte von alpha. (Figure 2)
-
-% time axis for the plot
-vectorLen= length(signalReal);
-xAchis = ((0:vectorLen-1)*Tsa);
-t = (0:length(symbols)-1) * Tsym* (10^-3); % time axis for the original symbols
-
-% plot the original symbols and the Carrier signal 
-alphas = [0, 0.4, 0.7, 0.9];
-
-fig2 = figure('Name', 'Figure 2: Impulsantword des Filters & Übertragungsfuntion vergleich', 'NumberTitle', 'off');                                            % real part
-subplot(2,1,1);
-hold on;
-for a = 1:length(alphas)
-    alpha_t = alphas(a);
-    h = rcosdesign(alpha_t,Nsym,Nsam,'sqrt');
-    scale = sum(h);
-    normalized_hrc = h/scale;
-    t = (0:length(h)-1); % time axis for the original symbols
-    plot(t,normalized_hrc,'DisplayName', sprintf('\\alpha = %.2f', alpha_t));
-end
-title('Impulse Response of the Filter with different Alphas');
-xlabel('Time [Tsym]');
-ylabel('h(t)');
-legend;
-grid on;
-
-subplot(2,1,2);
-f = linspace(-0.5, 0.5, 1024);   % Normalized frequency
-hold on;
-for a = 1:length(alphas)
-    alpha_t = alphas(a);
-    h = rcosdesign(alpha_t,Nsym,Nsam,'sqrt');
-    scale = sum(h);
-    normalized_hrc = h/scale;
-    transfer_function = fftshift(abs(fft(normalized_hrc, 1024))); % fft n = 1024 may need to be increased if not fine enough
-    plot(f,transfer_function,'DisplayName', sprintf('\\alpha = %.2f', alpha_t));
-end
-title('Transfer Function with different Alphas');
-xlabel('Frequency [1/Tsym]');
-ylabel('|H(f)|');
-legend;
-grid on;
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Plotten Sie den Ausgang des Filters und die eingegebenen Symbole. (Figure 3)
-% Wenden Sie das Filter ein zweites Mal an und plotten Sie den Filterausgang. (Figure 3, Subplots)
-% Plotten Sie außerdem das Augendiagramm. (Figure 3)
-% Plotten Sie den Symboltakt zusammen zu dem Matched Filter Ausgang (Figure 3).
-clock_axis = ((0:length(clockReal)-1)* Tsa);
-combinedMatch = yReal+ yImaginary.*1i; 
-
-% Plot of filter output after first filter
-symbolTime = (0:size(symbols,1)-1) * Tsym *(10^-3);
-fig3 = figure('Name', 'Figure 3: Pulseform Filter & Matched Filter, No Noise', 'NumberTitle', 'off');                                             % real part
-subplot(3,2,1);
-plot(xAchis, signalReal);
-hold on;
-stem(symbolTime,symbols(:,1));
-title('Real Impulse Response after Pulse Filter');
-xlabel('Time [Tsym]');
-ylabel('Real {y(n)}');
-
-subplot(3,2,2);                                     % imaginary part
-plot(xAchis,signalImaginary);
-hold on;
-stem(symbolTime,symbols(:,2));
-title('Imaginary Impulse Response after Pulse Filter');
-xlabel('Time [Tsym]');
-ylabel('Imaginary {y(n)}');
-
-% Plot of filter output after second filter
-x_axis = ((0:length(yReal)-1)*Tsa);                   % real part
-subplot(3,2,3);  
-plot(x_axis,yReal);
-hold on;
-stem(clock_axis, clockReal)
-title('Impulse Response after Matched Filter with Symboltakt');
-xlabel('Time [Tsym]');
-ylabel('Real {y(n)}');
-legend('Output', 'Symbol Clock');
-                                                      % imaginary part
-subplot(3,2,4);  
-plot(x_axis,yImaginary);
-hold on;
-hold on;
-stem(clock_axis, clockImaginary)
-title('Imaginary Impulse Response after Matched Filter with Symboltakt');
-xlabel('Time [Tsym]');
-ylabel('Imaginary {y(n)}');
-legend('Output', 'Symbol Clock');
-
-samplePerSymbol = 2*Nsam;
-eyeX = (0:samplePerSymbol-1)*Tsa*(1e6);
-max = length(yReal)-samplePerSymbol;
-
-% Eye diagram for real part
-subplot(3,2,5);  
-hold on;
-title('Eye Diagram for Two Symbols');
-xlabel('time (normed to symbol)');
-ylabel('Amplitude real');
-
-for n = 1:Nsam:max
-    symbolSamples = yReal(n:n+samplePerSymbol-1);
-    plot(eyeX,symbolSamples);
-end
-
-% Eye diagram for imaginary part
-subplot(3,2,6);  
-hold on;
-title('Eye Diagram for Two Symbols');
-xlabel('Time (normed to symbol)');
-ylabel('Amplitude imaginär');
-
-for n = 1:Nsam:max
-    symbolSamples = yImaginary(n:n+samplePerSymbol-1);
-    plot(eyeX,symbolSamples);
-end
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% figure 4: Mapping - Plotten Sie die komplexen Symbole als Konstellationsdiagramm
-scatterplot(combinedMatch);
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Figure 3+4 Plotten alle bisherigen Diagramme auf der Empfängerseite nun mit den verrauschten Signalen. (Figure 3+4)
-% filtered 
-
-% adding white Gaussian noise to the signal
-noisySignalReal = awgn(signalReal,10);                    % parameters:(signal,snr)
-noisySignalImaginary = awgn(signalImaginary,10);
-
-% plot signal with noise
-fig3_4 = figure('Name', 'Figure 3+4:  Pulseform Filter & Matched Filter, with Noise', 'NumberTitle', 'off');  
-
-% Plot of filter output after first filter
-symbolTime = (0:size(symbols,1)-1) * Tsym *(10^-3);
-subplot(3,2,1);
-plot(xAchis, noisySignalReal);
-hold on;
-stem(symbolTime,symbols(:,1));
-title('Noisey Real Impulse Response after Pulse Filter');
-xlabel('Time [Tsym]');
-ylabel('Real {y(n)}');
-
-subplot(3,2,2);                                     % imaginary part
-plot(xAchis,noisySignalImaginary);
-hold on;
-stem(symbolTime,symbols(:,2));
-title('Noisey Imaginary Impulse Response after Pulse Filter');
-xlabel('Time [Tsym]');
-ylabel('Imaginary {y(n)}');
-
-% Plot of filter output after second filter
-x_axis = ((0:length(yReal)-1)*Tsa);                   % real part
-symbolTime_1 = (0:size(symbols,1)-1) * Tsym *(10^-3);
-subplot(3,2,3);  
-plot(x_axis,yReal);
-hold on;
-%stem(symbolTime_1,decodedAfterSynch(:,1));
-title('Real Impulse Response after Matched Filter with Noise');
-xlabel('Time [Tsym]');
-ylabel('Real {y(n)}');
-                                                      % imaginary part
-subplot(3,2,4);  
-plot(x_axis,yImaginary);
-hold on;
-% stem(symbolTime_1,decodedAfterSynch(:,2));
-title('Imaginary Impulse Response after Matched Filter with Noise');
-xlabel('Time [Tsym]');
-ylabel('Imaginary {y(n)}');
-
-samplePerSymbol = 2*Nsam;
-eyeX = (0:samplePerSymbol-1)*Tsa*(1e6);
-max = length(yReal)-samplePerSymbol;
-
-% Eye diagram for real part
-subplot(3,2,5);  
-hold on;
-title('Noise added Eye Diagram for Two Symbols');
-xlabel('time (normed to symbol)');
-ylabel('Amplitude real');
-
-for n = 1:Nsam:max
-    symbolSamples = yReal(n:n+samplePerSymbol-1);
-    plot(eyeX,symbolSamples);
-end
-
-% Eye diagram for imaginary part
-subplot(3,2,6);  
-hold on;
-title('Noise added Eye Diagram for Two Symbols');
-xlabel('Time (normed to symbol)');
-ylabel('Amplitude imaginär');
-
-for n = 1:Nsam:max
-    symbolSamples = yImaginary(n:n+samplePerSymbol-1);
-    plot(eyeX,symbolSamples);
-end
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% modulation
-% Berechnen und plotten Sie zunächst den Betrag des Spektrums des komplexen Signals nach
-% dem Pulsformfilter (Figure 5)
-% demodulation
-% Plotten Sie das Betragsspektrum |𝑺𝑻𝑿(𝒇)| des Sendesignals (in einen zweiten Subplot von
-% Figure 5).
-
-s_TX = abs(fftshift(fft(sTX)));
-freqAxis = ((-length(s_TX)/2):(length(s_TX)/2)-1)/(length(s_TX)*fsa);
-
-fig5 = figure('Name', 'Figure 5: Modulation & Demodulation ', 'NumberTitle', 'off');  
-subplot(2,1,1); 
-plot(freqAxis, s_TX);
-xlabel('Normalized Frequency [Hz]');
-ylabel('|\it{S}_{TX}(f)|');
-title('Betragsspektrum |\it{S}_{TX}(f)| des nach dem Pulsformfilter');
-
-complexSignal_RX = demodulatedSignal(:,1) + 1i * demodulatedSignal(:,2);
-s_RX = abs(fftshift(fft(complexSignal_RX)));
-freqAxis = ((-length(s_RX)/2):(length(s_RX)/2)-1)/(length(s_RX)*fsa);
-
-subplot(2,1,2); 
-plot(freqAxis, s_RX);
-xlabel('Normalized Frequency [Hz]');
-ylabel('|\it{S}_{RX}(f)|');
-legend();
-title('Betragsspektrum |\it{S}_{RX}(f)| des Sendesignals nach demodulation');
-
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Um die Kanalverzerrung zu visualisieren, plotten Sie wie schon auf der Senderseite hier
-% nochmal das Konstellationsdiagramm (Realteil der Symbole auf der x-Achse, Imaginärteil
-% der Symbole auf der y-Achse) (Figure 6).
-%scatterplot(complexSignal_RX); % The last argument specifies the axes handle
-combinedSynchronizedSignal = synchedReal + synchedImaginary.*1i;
-
-scatterplot(complexSignal_RX);
-title('Figure 6a:Constellation before Synchronization');
-
-scatterplot(combinedSynchronizedSignal);
-title('Figure 6b:Constellation after Synchronization');
+% all plots in one function
+figures(symbols, signalReal, signalImaginary, yReal, yImaginary, Tsa, Tsym, Nsym, Nsam, alphas, clockReal, clockImaginary, sTX, fsa, demodulatedSignal, synchedReal, synchedImaginary, method); 

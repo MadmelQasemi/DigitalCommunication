@@ -63,5 +63,4 @@ for i = 1:length(signalReal)
     signal(i,1)= signalReal(i);
     signal(i,2)= signalImaginary(i);
 end
-
 end

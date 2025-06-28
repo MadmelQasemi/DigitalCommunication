@@ -55,7 +55,8 @@ if (method == "ASK")
         end
     end
 
-    % here we add the barkercode 
+    % here we add the barkercode
+
     resultWithBarker(:,1)=[barkerCode(1:end,1);bitsAsSymbols(1:end,1)];
     disp('bits mapped int symbols via ASK method');
 
@@ -89,20 +90,18 @@ elseif (method == "16QAM")
             end
         end
     end
-
-    disp('bits mapped int symbols via 16QAM method [real/imaginary]');
-    
-    
-
+    % add barkercode at the beginning of both columns
+    realWithBarker(:,1)=[barkerCode(1:end,1);bitsAsSymbols(1:end,1)];
+    imaginaryWithBarker(:,1)=[barkerCode(1:end,1);bitsAsSymbols(1:end,2)];
+    resultWithBarker=[realWithBarker, imaginaryWithBarker];
+    if debug_mode
+        disp('bits mapped int symbols via 16QAM method [real/imaginary]');
+    end
 end
+
 if debug_mode
-disp(bitsAsSymbols);
+    disp(bitsAsSymbols);
 end
-
-% add barkercode at the beginning of both columns
-realWithBarker(:,1)=[barkerCode(1:end,1);bitsAsSymbols(1:end,1)];
-imaginaryWithBarker(:,1)=[barkerCode(1:end,1);bitsAsSymbols(1:end,2)];
-resultWithBarker=[realWithBarker, imaginaryWithBarker];
 
 if debug_mode
     disp('result with barkercode');
