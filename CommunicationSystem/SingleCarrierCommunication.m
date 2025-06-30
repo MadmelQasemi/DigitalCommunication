@@ -53,7 +53,7 @@ end
 bitsForChannel = channelCoding(bits); 
 
 % choose your pain
-%method = "ASK"; 
+% method = "ASK"; 
 method = "16QAM"; 
 
 if method == "16QAM" 

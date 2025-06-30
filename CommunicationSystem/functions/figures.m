@@ -107,7 +107,7 @@ end
 plot(x_axis,yReal);
 hold on;
 stem(clock_axis, clockReal)
-title('Impulse Response after Matched Filter with Symboltakt');
+title('Real Signal after Matched Filter + clock');
 xlabel('Time [Tsym]');
 ylabel('Real {y(n)}');
 legend('Output', 'Symbol Clock');
@@ -118,7 +118,7 @@ if method == "16QAM"
     hold on;
     hold on;
     stem(clock_axis, clockImaginary)
-    title('Imaginary Impulse Response after Matched Filter with Symboltakt');
+    title('Imaginary Signal after Matched Filter + clock');
     xlabel('Time [Tsym]');
     ylabel('Imaginary {y(n)}');
     legend('Output', 'Symbol Clock');
